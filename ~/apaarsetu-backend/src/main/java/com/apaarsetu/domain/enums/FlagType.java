@@ -1,0 +1,10 @@
+package com.apaarsetu.domain.enums;
+
+public enum FlagType {
+    DUPLICATE_CONCURRENT_ENROLLMENT,
+    CAPACITY_OVERFLOW,
+    FORMAT_MISMATCH,
+    DUAL_ENROLLMENT,
+    CAPACITY_EXCEEDED,
+    INVALID_MIGRATION
+}

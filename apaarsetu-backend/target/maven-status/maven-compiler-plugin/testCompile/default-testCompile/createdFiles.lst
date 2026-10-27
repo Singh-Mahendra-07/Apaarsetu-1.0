@@ -1,0 +1,3 @@
+com/apaarsetu/repository/MongoPersistenceIntegrationTest.class
+com/apaarsetu/security/PasswordChangeEnforcementIntegrationTest.class
+com/apaarsetu/security/DevSecOpsRemediationIntegrationTest.class

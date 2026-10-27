@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.apaarsetu.repository.MongoPersistenceIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.027 s -- in com.apaarsetu.repository.MongoPersistenceIntegrationTest

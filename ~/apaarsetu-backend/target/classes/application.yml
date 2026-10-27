@@ -1,0 +1,67 @@
+server:
+  port: ${PORT:8081}
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: apaarsetu-backend
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:${MONGO_URI:${SPRING_DATA_MONGODB_URI:${MONGODB_URL:mongodb://localhost:27017/apaarsetu}}}}
+      auto-index-creation: false
+      field-naming-strategy: org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  cors-origins: ${CORS_ORIGINS:http://localhost:3000,http://127.0.0.1:3000}
+  security:
+    jwt-secret: ${JWT_SECRET:ApaarSetuSecretKey2026MasterJwtTokenSignatureForNationalRegistryHS256SuperSecureProductionKey}
+    access-token-expiration-ms: 9000000
+    refresh-token-expiration-ms: 604800000
+    mfa-challenge-expiration-ms: 300000
+    aes-key: ${AES_KEY:ApaarSetuMasterAesKey2026Secure!}
+  batch:
+    max-rows: 5000
+    async-thread-pool-size: 4
+  rate-limit:
+    requests-per-minute: 1000
+    verification-per-minute: 200
+    trust-proxy: ${TRUST_PROXY:false}
+  bootstrap:
+    enabled: ${APP_BOOTSTRAP_ENABLED:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+  health:
+    mail:
+      enabled: false

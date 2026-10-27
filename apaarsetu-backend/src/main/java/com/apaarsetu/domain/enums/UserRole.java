@@ -1,0 +1,10 @@
+package com.apaarsetu.domain.enums;
+
+public enum UserRole {
+    ROLE_AICTE_ADMIN,
+    ROLE_AICTE_OFFICER,
+    ROLE_INSTITUTION_ADMIN,
+    ROLE_INSTITUTION_OPERATOR,
+    ROLE_AUTHORIZED_VERIFIER,
+    ROLE_ERP_CLIENT
+}

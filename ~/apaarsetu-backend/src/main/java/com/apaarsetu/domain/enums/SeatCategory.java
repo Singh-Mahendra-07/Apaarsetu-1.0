@@ -1,0 +1,11 @@
+package com.apaarsetu.domain.enums;
+
+public enum SeatCategory {
+    REGULAR_GENERAL,
+    REGULAR_RESERVED,
+    SUPERNUMERARY_TFW,
+    SUPERNUMERARY_EWS,
+    SUPERNUMERARY_NRI,
+    SUPERNUMERARY_OCI_FN,
+    SUPERNUMERARY_PMSSS
+}
