@@ -27,6 +27,23 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: MongoPersistenceIntegrationTest.java
+ * Package: com.apaarsetu.repository
+ * Component: MongoPersistenceIntegrationTest (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Integration and regression test suite verifying 'MongoPersistenceIntegrationTest' security, business rules, and stability.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Uses SpringBootTest, MockMvc, and embedded or test MongoDB instances.
+ * 2. Asserts correct behavior for authorization, business constraints, and error envelopes.
+ * 3. Serves as automated regression prevention during continuous integration builds.
+ * ============================================================================
+ */
 @SpringBootTest
 @DisplayName("MongoDB Integration & Database Persistence Verification Suite")
 public class MongoPersistenceIntegrationTest {

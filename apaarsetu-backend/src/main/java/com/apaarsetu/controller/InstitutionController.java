@@ -18,6 +18,24 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: InstitutionController.java
+ * Package: com.apaarsetu.controller
+ * Component: InstitutionController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Manages higher education institution master records, approved program quotas, intake expansions, and ERP API keys.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Exposes GET /institutions for paginated, searchable institution listings across regions.
+ * 2. Exposes PUT /institutions/{id}/intake for updating AICTE-approved student intake quotas per program.
+ * 3. Exposes POST /institutions/{id}/api-keys for issuing hashed ERP integration credentials.
+ * 4. Restricts sensitive updates to AICTE Admins and assigned Institution Admins.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequestMapping("/institutions")

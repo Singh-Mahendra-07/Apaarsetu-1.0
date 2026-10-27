@@ -23,6 +23,24 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: BatchUploadController.java
+ * Package: com.apaarsetu.controller
+ * Component: BatchUploadController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Exposes REST endpoints for institutional bulk student admissions via CSV upload, asynchronous validation tracking, and batch approval.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Handles multipart/form-data CSV uploads via @PostMapping(/upload).
+ * 2. Initiates asynchronous parsing in BatchUploadService, returning an immediate UploadBatch reference.
+ * 3. Exposes GET endpoints to query batch processing progress, row-by-row error logs, and batch statistics.
+ * 4. Exposes approval and rejection actions for Institution Admins before final registry commitment.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequestMapping("/batches")

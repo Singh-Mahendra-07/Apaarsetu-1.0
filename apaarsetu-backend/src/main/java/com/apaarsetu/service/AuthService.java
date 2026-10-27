@@ -23,6 +23,24 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Optional;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: AuthService.java
+ * Package: com.apaarsetu.service
+ * Component: AuthService (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Orchestrates user authentication, password validation, JWT issuance, TOTP multi-factor verification, and session lifecycle.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Verifies credentials via Spring AuthenticationManager and BCrypt.
+ * 2. Issues signed Access and Refresh JWT tokens using JwtTokenProvider.
+ * 3. Manages TOTP secret generation and verification using TotpService.
+ * 4. Enforces first-time password resets and records login history.
+ * ============================================================================
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

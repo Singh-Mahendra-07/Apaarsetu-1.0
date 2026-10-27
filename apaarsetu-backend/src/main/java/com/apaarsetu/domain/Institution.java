@@ -17,6 +17,23 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: Institution.java
+ * Package: com.apaarsetu.domain
+ * Component: Institution (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Domain document representing an accredited college, university, or polytechnic institution recognized by AICTE, stored in 'institutions'.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Stores institution code, AISHE code, accredited name, region zone, and accreditation status.
+ * 2. Holds a list of ApprovedProgram sub-documents specifying maximum allowed annual intake quotas.
+ * 3. Contains hashed ERP API keys for secure institutional system synchronization.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

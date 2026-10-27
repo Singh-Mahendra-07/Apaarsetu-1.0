@@ -12,6 +12,23 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: EnumController.java
+ * Package: com.apaarsetu.controller
+ * Component: EnumController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Exposes system dictionary reference values to the Next.js frontend, ensuring form dropdowns and filters stay synchronized with backend enums.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Serves public/authenticated endpoints under /enums (admission-statuses, seat-categories, institution-types, etc.).
+ * 2. Converts Java enum constants into clean EnumItemDTO objects with display labels and codes.
+ * 3. Cached on the client to eliminate repetitive metadata lookups.
+ * ============================================================================
+ */
 @RestController
 @RequestMapping("/enums")
 public class EnumController {

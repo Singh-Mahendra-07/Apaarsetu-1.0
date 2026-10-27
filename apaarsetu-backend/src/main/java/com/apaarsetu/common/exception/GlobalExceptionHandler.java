@@ -17,6 +17,24 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import java.time.Instant;
 import java.util.*;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: GlobalExceptionHandler.java
+ * Package: com.apaarsetu.common.exception
+ * Component: GlobalExceptionHandler (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Acts as the centralized interceptor for all uncaught exceptions thrown across the application. Prevents sensitive stack traces from leaking to clients and transforms errors into structured ApiResponse payloads.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Annotated with @RestControllerAdvice to observe all @RestController endpoints.
+ * 2. Handles Bean Validation errors (MethodArgumentNotValidException), returning 400 Bad Request with field-level error messages.
+ * 3. Maps domain exceptions (DuplicateEnrollmentException, ResourceNotFoundException, UnauthorizedException) to corresponding HTTP statuses (409, 404, 401).
+ * 4. Catches unhandled Exception instances, logs security-relevant details, and returns a safe HTTP 500 error envelope.
+ * ============================================================================
+ */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {

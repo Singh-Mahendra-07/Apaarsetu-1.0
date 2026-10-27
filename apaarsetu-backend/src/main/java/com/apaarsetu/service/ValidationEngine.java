@@ -21,6 +21,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: ValidationEngine.java
+ * Package: com.apaarsetu.service
+ * Component: ValidationEngine (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Encapsulates all regulatory validation rules, checksum algorithms, age requirements, and intake capacity boundary checks.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Validates 12-digit APAAR ID syntax and mathematical Luhn/Verhoeff checksums.
+ * 2. Enforces minimum age constraints based on program level and date of birth.
+ * 3. Verifies seat category rules (General, EWS, Reserved) against institution quotas.
+ * 4. Detects active concurrent enrollments to prevent duplicate student registrations.
+ * ============================================================================
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

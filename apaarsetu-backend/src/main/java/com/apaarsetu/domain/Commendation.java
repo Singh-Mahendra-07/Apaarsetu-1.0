@@ -11,6 +11,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: Commendation.java
+ * Package: com.apaarsetu.domain
+ * Component: Commendation (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Domain entity recording official AICTE excellence commendations granted to institutions achieving 100% verified compliance.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Captures academic year, institution ID, criteria met, citation text, and issuing officer ID.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

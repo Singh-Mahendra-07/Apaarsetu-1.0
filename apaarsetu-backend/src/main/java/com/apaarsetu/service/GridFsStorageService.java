@@ -18,6 +18,23 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: GridFsStorageService.java
+ * Package: com.apaarsetu.service
+ * Component: GridFsStorageService (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Provides abstraction over MongoDB GridFS for storing and retrieving binary documents (dispute evidence, CSV batch files, certificates).
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Uses Spring Data Mongo GridFsTemplate to store files with metadata.
+ * 2. Validates allowed MIME types (PDF, PNG, JPEG, CSV) and size limits (5MB).
+ * 3. Streams stored documents back for authorized download endpoints.
+ * ============================================================================
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

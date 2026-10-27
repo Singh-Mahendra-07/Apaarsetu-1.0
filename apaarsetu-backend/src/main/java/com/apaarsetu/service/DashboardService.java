@@ -25,6 +25,23 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: DashboardService.java
+ * Package: com.apaarsetu.service
+ * Component: DashboardService (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Aggregates system-wide analytics, institution statistics, intake compliance ratios, and discrepancy radar metrics.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Uses MongoDB aggregation pipelines to compute national student counts and institution tallies.
+ * 2. Detects capacity violations by comparing enrolled counts against approved quotas.
+ * 3. Identifies cross-institutional dual-enrollment anomalies across universities.
+ * ============================================================================
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

@@ -10,6 +10,22 @@ import org.springframework.data.domain.Page;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: PagedResponse.java
+ * Package: com.apaarsetu.common.dto
+ * Component: PagedResponse (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Encapsulates pagination metadata and item arrays for large datasets (e.g., student rosters, batch logs, audit trails), translating Spring Data Page objects into frontend-friendly JSON structures.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Stores 'content' (List of T), 'totalElements' (long count), 'totalPages' (int count), and current 'pageNumber' / 'pageSize'.
+ * 2. Mirrors the Next.js PagedResponse<T> TypeScript interface for seamless pagination controls in data tables.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

@@ -10,6 +10,24 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: CreateInstitutionDTO.java
+ * Package: com.apaarsetu.dto
+ * Component: CreateInstitutionDTO (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Defines the input contract for registering a new higher education institution in the national registry.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Validates institution legal name, AISHE code, institution type, regional zone, contact details, and initial approved programs list.
+ * 2. Annotated with Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor) for clean object lifecycle.
+ * 3. Enforces Jakarta Bean Validation rules (@NotBlank, @NotNull, @Size, @Pattern) before service processing.
+ * 4. Serialized to/from JSON and mapped 1-to-1 with Next.js TypeScript interfaces in types/api.ts.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

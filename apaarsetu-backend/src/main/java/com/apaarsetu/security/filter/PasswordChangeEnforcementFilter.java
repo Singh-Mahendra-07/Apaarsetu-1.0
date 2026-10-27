@@ -29,6 +29,23 @@ import java.util.List;
  * requiresPasswordChange = true, explicitly permitting only the password resolution
  * request and essential session endpoints (logout, health, preflight).
  */
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: PasswordChangeEnforcementFilter.java
+ * Package: com.apaarsetu.security.filter
+ * Component: PasswordChangeEnforcementFilter (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Enforces mandatory password changes for freshly provisioned accounts before granting access to privileged resources.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Intercepts authenticated requests and inspects user's 'requiresPasswordChange' flag.
+ * 2. If true, restricts navigation exclusively to /auth/password/first-time-reset and /auth/logout.
+ * 3. Returns HTTP 403 with specific error code if unreset accounts attempt general API usage.
+ * ============================================================================
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

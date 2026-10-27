@@ -32,6 +32,23 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: AdminUserController.java
+ * Package: com.apaarsetu.controller
+ * Component: AdminUserController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Central user administration controller for system-wide account lifecycle, privilege escalations, account suspensions, and credential resets.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Maps administrative endpoints under /admin/users for AICTE Central Admins.
+ * 2. Supports paginated listing, role updates, account unlocking, and manual temporary password generation.
+ * 3. Enforces institution scoping to prevent cross-tenant privilege escalation.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequiredArgsConstructor

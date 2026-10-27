@@ -12,6 +12,23 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Instant;
 import java.util.Map;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: HealthCheckController.java
+ * Package: com.apaarsetu.controller
+ * Component: HealthCheckController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Provides liveness, readiness, and diagnostic ping endpoints for container orchestrators (Docker, Kubernetes) and uptime monitors.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Exposes GET /health and /ping without authentication.
+ * 2. Verifies MongoDB connectivity, disk thresholds, and active memory usage.
+ * 3. Returns HTTP 200 OK with timestamp and service version when healthy.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequestMapping("/health")

@@ -11,6 +11,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: VerificationDispute.java
+ * Package: com.apaarsetu.domain
+ * Component: VerificationDispute (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Represents a contested candidate verification result where a candidate or college challenges a discrepancy flag.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Tracks dispute reason, attached proof documents, reviewing officer, and final adjudication outcome.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

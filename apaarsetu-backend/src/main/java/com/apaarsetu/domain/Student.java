@@ -18,6 +18,23 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: Student.java
+ * Package: com.apaarsetu.domain
+ * Component: Student (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Core domain document representing an enrolled student record in the national APAAR registry, stored in the 'students' MongoDB collection.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Indexed by unique compound key (apaarId, institutionId, academicYear) to block duplicate intake.
+ * 2. Encapsulates personal information, admission details, program codes, seat category, and admission status.
+ * 3. Tracks historical validationResults, dispute evidence file IDs, and optimistic locking version.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

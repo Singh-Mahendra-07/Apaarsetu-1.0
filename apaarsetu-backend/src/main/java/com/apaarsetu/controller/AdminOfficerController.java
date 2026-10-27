@@ -26,6 +26,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: AdminOfficerController.java
+ * Package: com.apaarsetu.controller
+ * Component: AdminOfficerController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Handles administrative management of AICTE regional and compliance officers, including account creation, regional zone assignments, and status toggles.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Exposes CRUD endpoints under /admin/officers restricted to ROLE_AICTE_ADMIN.
+ * 2. Interacts with UserRepository and AuthService to provision officer accounts with mandatory password reset requirements.
+ * 3. Logs administrative provisioning events via AuditService.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequestMapping("/admin/officers")

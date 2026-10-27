@@ -12,6 +12,23 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: UserPrincipal.java
+ * Package: com.apaarsetu.security
+ * Component: UserPrincipal (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Custom UserDetails implementation bridging the User domain entity to Spring Security's authentication context.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Implements org.springframework.security.core.userdetails.UserDetails.
+ * 2. Provides user email, hashed password, granted authorities, institution affiliation, and account status flags.
+ * 3. Injected into controller methods via @AuthenticationPrincipal.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

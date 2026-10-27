@@ -14,6 +14,23 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: AuditLog.java
+ * Package: com.apaarsetu.domain
+ * Component: AuditLog (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Represents an immutable, tamper-evident audit trail event for every significant action performed in the national registry.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Captures actor email, user role, action type (CREATE_STUDENT, OVERRIDE_CAPACITY, RESOLVE_FLAG, LOGIN), and target resource ID.
+ * 2. Stores client IP address, User-Agent, before/after delta snapshots, and exact UTC timestamp.
+ * 3. Queried by compliance officers to investigate anomalies and ensure regulatory accountability.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

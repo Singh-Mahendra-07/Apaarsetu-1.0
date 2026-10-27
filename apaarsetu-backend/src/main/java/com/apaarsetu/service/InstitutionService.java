@@ -26,6 +26,23 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.*;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: InstitutionService.java
+ * Package: com.apaarsetu.service
+ * Component: InstitutionService (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Manages institution registration, program intake updates, accreditation monitoring, and ERP API key generation.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Handles CRUD operations for higher education institutions.
+ * 2. Manages approved academic programs, allowed intake, and supernumerary quotas (EWS, TFW, Sports).
+ * 3. Issues cryptographically secure ERP API keys and stores their SHA-256 hashes.
+ * ============================================================================
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

@@ -1,3 +1,21 @@
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: UpdateSystemSettingRequest.java
+ * Package: com.apaarsetu.dto
+ * Component: UpdateSystemSettingRequest (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Submits administrative changes to global platform runtime configuration settings.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Contains setting key, new string/boolean value, and description of policy adjustment.
+ * 2. Annotated with Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor) for clean object lifecycle.
+ * 3. Enforces Jakarta Bean Validation rules (@NotBlank, @NotNull, @Size, @Pattern) before service processing.
+ * 4. Serialized to/from JSON and mapped 1-to-1 with Next.js TypeScript interfaces in types/api.ts.
+ * ============================================================================
+ */
 package com.apaarsetu.dto;
 
 import jakarta.validation.constraints.Max;

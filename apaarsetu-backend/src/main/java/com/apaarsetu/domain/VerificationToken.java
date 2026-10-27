@@ -11,6 +11,22 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: VerificationToken.java
+ * Package: com.apaarsetu.domain
+ * Component: VerificationToken (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Stores time-limited, cryptographically secure verification tokens issued for authorized third-party credential checks under DPDP guidelines.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Contains hashed token, student ID, verifier organization name, purpose, and expiration timestamp.
+ * 2. Enforces single-use or strict time-window access to prevent unauthorized candidate data harvesting.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

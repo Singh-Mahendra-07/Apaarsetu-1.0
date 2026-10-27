@@ -9,6 +9,24 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: ComplianceOverviewDTO.java
+ * Package: com.apaarsetu.dto
+ * Component: ComplianceOverviewDTO (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Summarizes the institutional regulatory compliance score and outstanding flags for AICTE compliance officers.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Aggregates total enrolled students, verified percentage, unresolved discrepancy flags, and compliance rating.
+ * 2. Annotated with Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor) for clean object lifecycle.
+ * 3. Enforces Jakarta Bean Validation rules (@NotBlank, @NotNull, @Size, @Pattern) before service processing.
+ * 4. Serialized to/from JSON and mapped 1-to-1 with Next.js TypeScript interfaces in types/api.ts.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

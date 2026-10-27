@@ -14,6 +14,23 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: UploadBatch.java
+ * Package: com.apaarsetu.domain
+ * Component: UploadBatch (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Tracks the lifecycle, row-level progress, validation metrics, and approval state of bulk student enrollment CSV uploads.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Contains metadata: totalRows, processedRows, errorRows, status (UPLOADED, VALIDATING, COMPLETED, FAILED).
+ * 2. References GridFS storage file ID for original CSV and generated error reports.
+ * 3. Stores approval/rejection signatures from authorized Institution Administrators.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

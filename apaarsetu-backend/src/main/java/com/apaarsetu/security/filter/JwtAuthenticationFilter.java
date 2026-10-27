@@ -20,6 +20,24 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: JwtAuthenticationFilter.java
+ * Package: com.apaarsetu.security.filter
+ * Component: JwtAuthenticationFilter (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Pre-authentication filter parsing and validating JWT Bearer tokens on incoming HTTP requests.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Extracts 'Bearer <token>' from the Authorization header.
+ * 2. Verifies cryptographic signature and expiry via JwtTokenProvider.
+ * 3. Checks token ID against RevokedTokenRepository to reject logged-out sessions.
+ * 4. Populates Spring SecurityContextHolder with authenticated UserPrincipal.
+ * ============================================================================
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

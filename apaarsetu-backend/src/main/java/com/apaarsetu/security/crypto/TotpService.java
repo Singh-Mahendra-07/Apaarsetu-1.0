@@ -13,6 +13,23 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Optional;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: TotpService.java
+ * Package: com.apaarsetu.security.crypto
+ * Component: TotpService (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Implements RFC 6238 Time-Based One-Time Password (TOTP) algorithm for two-factor authentication.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Generates cryptographically random Base32 secret keys for user authenticator apps.
+ * 2. Produces otpauth:// URIs compatible with Google Authenticator, Microsoft Authenticator, and Authy.
+ * 3. Validates submitted 6-digit codes with time-window drift tolerance.
+ * ============================================================================
+ */
 @Slf4j
 @Service
 public class TotpService {

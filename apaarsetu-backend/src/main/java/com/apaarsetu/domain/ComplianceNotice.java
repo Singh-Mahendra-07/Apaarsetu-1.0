@@ -13,6 +13,22 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: ComplianceNotice.java
+ * Package: com.apaarsetu.domain
+ * Component: ComplianceNotice (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Domain document for formal regulatory violation notices issued by AICTE to colleges exceeding approved intake or admitting unverified candidates.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Records issuing officer, targeted institution, violation category, and compliance deadline.
+ * 2. Tracks institution explanation responses and final regulatory disposition.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

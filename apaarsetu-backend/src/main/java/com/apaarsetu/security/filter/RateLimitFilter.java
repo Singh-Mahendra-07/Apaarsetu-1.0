@@ -25,6 +25,23 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: RateLimitFilter.java
+ * Package: com.apaarsetu.security.filter
+ * Component: RateLimitFilter (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Protects the backend from DDoS, credential stuffing, and scraping through in-memory token bucket rate limiting.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Tracks client IP address and authenticated user request counters.
+ * 2. Enforces per-minute request thresholds (e.g., 1000 requests/min general, 200/min verification).
+ * 3. Returns HTTP 429 Too Many Requests when limits are exceeded.
+ * ============================================================================
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

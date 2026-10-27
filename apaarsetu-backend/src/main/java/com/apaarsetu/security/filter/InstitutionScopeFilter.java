@@ -20,6 +20,23 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: InstitutionScopeFilter.java
+ * Package: com.apaarsetu.security.filter
+ * Component: InstitutionScopeFilter (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Enforces multi-tenant data boundaries ensuring institution users cannot read or write data of other institutions.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Inspects authenticated user principal's institutionId.
+ * 2. Validates that requested institution path parameters or query parameters match the caller's assigned institution.
+ * 3. Rejects cross-institution tampering with HTTP 403 Forbidden.
+ * ============================================================================
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

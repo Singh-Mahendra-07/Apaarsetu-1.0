@@ -13,6 +13,22 @@ import org.springframework.stereotype.Component;
  * Lead SRE Application Lifecycle & Reliability Monitor
  * Verifies network port binding and MongoDB database connectivity upon application startup.
  */
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: ApplicationLifecycleManager.java
+ * Package: com.apaarsetu.config
+ * Component: ApplicationLifecycleManager (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Component in the APAARSetu backend system supporting 'ApplicationLifecycleManager' functionality.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Fulfills architectural requirements for ApplicationLifecycleManager.
+ * 2. Integrates with the Spring Boot application context and associated domain services.
+ * ============================================================================
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

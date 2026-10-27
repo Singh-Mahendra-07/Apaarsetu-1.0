@@ -10,6 +10,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: UserPreference.java
+ * Package: com.apaarsetu.domain
+ * Component: UserPreference (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Stores personalized UI configuration settings for individual administrators and operators.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Holds user ID, dashboard layout configurations, notification channels, and display preferences.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

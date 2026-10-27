@@ -8,6 +8,24 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: DossierDTO.java
+ * Package: com.apaarsetu.dto
+ * Component: DossierDTO (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Transfers a complete candidate academic dossier combining verified credentials, personal details, and admission timeline.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Assembled for authorized verification agencies and institutional review, containing student profile, academic history, and validation audit stamps.
+ * 2. Annotated with Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor) for clean object lifecycle.
+ * 3. Enforces Jakarta Bean Validation rules (@NotBlank, @NotNull, @Size, @Pattern) before service processing.
+ * 4. Serialized to/from JSON and mapped 1-to-1 with Next.js TypeScript interfaces in types/api.ts.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

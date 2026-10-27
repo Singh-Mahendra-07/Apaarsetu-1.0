@@ -22,6 +22,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: DatabaseBootstrapInitializer.java
+ * Package: com.apaarsetu.config
+ * Component: DatabaseBootstrapInitializer (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Component in the APAARSetu backend system supporting 'DatabaseBootstrapInitializer' functionality.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Fulfills architectural requirements for DatabaseBootstrapInitializer.
+ * 2. Integrates with the Spring Boot application context and associated domain services.
+ * ============================================================================
+ */
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "app.bootstrap.enabled", havingValue = "true", matchIfMissing = true)

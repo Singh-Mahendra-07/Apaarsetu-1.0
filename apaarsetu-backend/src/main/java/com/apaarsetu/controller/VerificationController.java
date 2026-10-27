@@ -17,6 +17,23 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: VerificationController.java
+ * Package: com.apaarsetu.controller
+ * Component: VerificationController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Handles degree and student identity verifications for third-party verifiers (employers, foreign universities) and QR code scanning.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Exposes POST /verify/manual requiring explicit DPDP (Digital Personal Data Protection) student consent token.
+ * 2. Exposes GET /verify/qr/{qrPayload} to cryptographically verify tampered-proof student credential QR codes.
+ * 3. Logs every verification attempt into AuditService for candidate transparency.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequestMapping("/verify")

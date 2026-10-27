@@ -35,6 +35,23 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: OfficerComplianceController.java
+ * Package: com.apaarsetu.controller
+ * Component: OfficerComplianceController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Provides workflow endpoints for AICTE Compliance Officers to issue regulatory notices, manage inquiries, review institution disputes, and award commendations.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Exposes endpoints under /compliance for regulatory notices and official warnings.
+ * 2. Exposes /compliance/inquiries for structured communication threads between AICTE and non-compliant colleges.
+ * 3. Manages commendations for institutions maintaining zero-discrepancy records.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequiredArgsConstructor

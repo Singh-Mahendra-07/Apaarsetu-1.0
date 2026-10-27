@@ -11,6 +11,23 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: StudentRepository.java
+ * Package: com.apaarsetu.repository
+ * Component: StudentRepository (interface)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Spring Data MongoDB repository interface for accessing and managing 'Student' documents.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Extends MongoRepository<Student, String> to provide standard CRUD, pagination, and sorting.
+ * 2. Defines specialized derived query methods for high-frequency lookup operations.
+ * 3. Leverages MongoDB indexes defined on the underlying entity for sub-millisecond query execution.
+ * ============================================================================
+ */
 @Repository
 public interface StudentRepository extends MongoRepository<Student, String> {
     Optional<Student> findByApaarId(String apaarId);

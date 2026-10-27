@@ -24,6 +24,23 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: VerificationService.java
+ * Package: com.apaarsetu.service
+ * Component: VerificationService (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Handles third-party candidate credential verifications, QR code cryptographic validation, and DPDP consent tracking.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Verifies student credential requests against candidate registry records.
+ * 2. Validates cryptographically signed QR codes embedded on candidate degree documents.
+ * 3. Ensures DPDP compliance by verifying explicit candidate consent tokens.
+ * ============================================================================
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

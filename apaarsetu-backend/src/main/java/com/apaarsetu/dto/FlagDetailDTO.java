@@ -9,6 +9,24 @@ import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: FlagDetailDTO.java
+ * Package: com.apaarsetu.dto
+ * Component: FlagDetailDTO (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Provides in-depth investigation data for an open discrepancy or compliance flag.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Encapsulates flag ID, flag type, severity, student APAAR ID, institution ID, evidence documentation references, and audit history.
+ * 2. Annotated with Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor) for clean object lifecycle.
+ * 3. Enforces Jakarta Bean Validation rules (@NotBlank, @NotNull, @Size, @Pattern) before service processing.
+ * 4. Serialized to/from JSON and mapped 1-to-1 with Next.js TypeScript interfaces in types/api.ts.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

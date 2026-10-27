@@ -12,6 +12,23 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: InstitutionRepository.java
+ * Package: com.apaarsetu.repository
+ * Component: InstitutionRepository (interface)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Spring Data MongoDB repository interface for accessing and managing 'Institution' documents.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Extends MongoRepository<Institution, String> to provide standard CRUD, pagination, and sorting.
+ * 2. Defines specialized derived query methods for high-frequency lookup operations.
+ * 3. Leverages MongoDB indexes defined on the underlying entity for sub-millisecond query execution.
+ * ============================================================================
+ */
 @Repository
 public interface InstitutionRepository extends MongoRepository<Institution, String> {
     Optional<Institution> findByAicteId(String aicteId);

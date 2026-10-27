@@ -29,6 +29,24 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: DashboardController.java
+ * Package: com.apaarsetu.controller
+ * Component: DashboardController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Provides aggregated national KPIs, regional analytics, capacity breach alerts, and cross-institutional anomaly feeds for AICTE executive dashboards.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Exposes GET /dashboard/national for total enrollment counts, active institutions, and validation ratios.
+ * 2. Exposes GET /dashboard/capacity-violations to stream real-time over-admission alerts across programs.
+ * 3. Exposes GET /dashboard/anomalies to detect duplicate registrations across different universities.
+ * 4. Exposes GET /dashboard/institution to render institution-specific metrics for campus administrators.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequiredArgsConstructor

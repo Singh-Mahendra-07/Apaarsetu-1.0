@@ -29,6 +29,24 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.util.*;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: StudentService.java
+ * Package: com.apaarsetu.service
+ * Component: StudentService (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Core business service governing the candidate registry, student registration, intake capacity enforcement, and record updates.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Validates incoming candidate details through ValidationEngine.
+ * 2. Checks institutional program seat availability before committing admissions.
+ * 3. Enforces unique APAAR ID constraints per academic year.
+ * 4. Dispatches audit log entries for every candidate lifecycle modification.
+ * ============================================================================
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

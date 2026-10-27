@@ -9,6 +9,24 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: CreateStudentDTO.java
+ * Package: com.apaarsetu.dto
+ * Component: CreateStudentDTO (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Defines the input contract for registering a candidate with APAAR ID verification and admission details.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Validates 12-digit APAAR ID, candidate full name, date of birth, gender, program code, academic year, and seat category.
+ * 2. Annotated with Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor) for clean object lifecycle.
+ * 3. Enforces Jakarta Bean Validation rules (@NotBlank, @NotNull, @Size, @Pattern) before service processing.
+ * 4. Serialized to/from JSON and mapped 1-to-1 with Next.js TypeScript interfaces in types/api.ts.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

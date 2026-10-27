@@ -6,6 +6,24 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: AnomalyDTO.java
+ * Package: com.apaarsetu.dto
+ * Component: AnomalyDTO (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Transfers cross-institutional anomaly detection data when a student APAAR ID is found registered in concurrent regular programs.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Encapsulates candidate APAAR ID, offending institutions, academic years, and anomaly severity for compliance radar display.
+ * 2. Annotated with Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor) for clean object lifecycle.
+ * 3. Enforces Jakarta Bean Validation rules (@NotBlank, @NotNull, @Size, @Pattern) before service processing.
+ * 4. Serialized to/from JSON and mapped 1-to-1 with Next.js TypeScript interfaces in types/api.ts.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

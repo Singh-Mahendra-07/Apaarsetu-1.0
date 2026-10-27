@@ -13,6 +13,24 @@ import org.springframework.data.mongodb.core.index.IndexOperations;
 
 import java.time.Duration;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: MongoIndexConfig.java
+ * Package: com.apaarsetu.config
+ * Component: MongoIndexConfig (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Programmatically enforces and verifies required MongoDB compound, unique, and TTL indexes on application startup, preventing race conditions and ensuring fast search performance for high-volume registry queries.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Uses @PostConstruct to execute index verification after Spring Data context initialization.
+ * 2. Inspects collections such as 'students', 'institutions', 'users', 'upload_batches', and 'audit_logs'.
+ * 3. Ensures compound unique index 'uidx_apaar_institution_academicYear' exists to prevent duplicate enrollments.
+ * 4. Configures Time-To-Live (TTL) indexes on temporary collections like 'revoked_tokens' and 'verification_tokens'.
+ * ============================================================================
+ */
 @Slf4j
 @Configuration
 @ConditionalOnProperty(name = "app.mongodb.indexes.enabled", havingValue = "true", matchIfMissing = true)

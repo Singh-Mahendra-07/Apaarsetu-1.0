@@ -14,6 +14,23 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: AesEncryptionService.java
+ * Package: com.apaarsetu.security.crypto
+ * Component: AesEncryptionService (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Provides AES-256-GCM symmetric cryptographic operations for encrypting sensitive PII at rest.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Uses Java Cryptography Architecture (JCA) with AES/GCM/NoPadding.
+ * 2. Generates unique 12-byte initialization vectors (IV) for every encryption operation.
+ * 3. Encrypts sensitive fields (Aadhaar, national IDs) before persistence and decrypts on authorized retrieval.
+ * ============================================================================
+ */
 @Slf4j
 @Service
 public class AesEncryptionService {

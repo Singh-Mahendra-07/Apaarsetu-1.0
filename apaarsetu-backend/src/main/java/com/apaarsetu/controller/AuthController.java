@@ -12,6 +12,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: AuthController.java
+ * Package: com.apaarsetu.controller
+ * Component: AuthController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Primary authentication controller handling login, token refresh, TOTP multi-factor authentication (MFA), password reset, and session logout.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Exposes /auth/login for email/password authentication, returning JWT access and refresh tokens.
+ * 2. Exposes /auth/refresh to perform sliding token expiration renewals without re-entering credentials.
+ * 3. Exposes /auth/mfa/setup and /auth/mfa/verify for TOTP authenticator app pairing.
+ * 4. Exposes /auth/password/first-time-reset to enforce mandatory credential changes on initial provision.
+ * 5. Exposes /auth/logout to invalidate active JWTs in RevokedTokenRepository.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequestMapping("/auth")

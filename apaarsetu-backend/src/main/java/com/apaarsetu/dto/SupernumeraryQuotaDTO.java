@@ -7,6 +7,24 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: SupernumeraryQuotaDTO.java
+ * Package: com.apaarsetu.dto
+ * Component: SupernumeraryQuotaDTO (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Defines approved seat allowances for government-mandated supernumerary categories beyond standard program intake.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Details quotas for EWS (10%), TFW (Tuition Fee Waiver 5%), Sports Quota, PMSSS (J&K scholarship), and PwD.
+ * 2. Annotated with Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor) for clean object lifecycle.
+ * 3. Enforces Jakarta Bean Validation rules (@NotBlank, @NotNull, @Size, @Pattern) before service processing.
+ * 4. Serialized to/from JSON and mapped 1-to-1 with Next.js TypeScript interfaces in types/api.ts.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

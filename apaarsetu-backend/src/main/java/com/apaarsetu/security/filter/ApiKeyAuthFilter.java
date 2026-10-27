@@ -26,6 +26,23 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: ApiKeyAuthFilter.java
+ * Package: com.apaarsetu.security.filter
+ * Component: ApiKeyAuthFilter (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Security filter authenticating external institution ERP systems communicating via API keys.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Intercepts incoming requests containing 'X-API-Key' header.
+ * 2. Computes SHA-256 hash of provided key and checks against registered Institution keys in MongoDB.
+ * 3. Populates SecurityContext with institutional credentials if valid.
+ * ============================================================================
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

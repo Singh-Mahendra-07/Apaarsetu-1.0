@@ -15,6 +15,23 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: User.java
+ * Package: com.apaarsetu.domain
+ * Component: User (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Domain document representing a system user account (Admins, Officers, Operators, Verifiers), stored in 'users'.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Stores BCrypt-hashed password, assigned UserRole, and institution association.
+ * 2. Maintains TOTP MFA secrets, password change enforcement flags, and failed login attempt counters.
+ * 3. Provides audit timestamps for account creation and last authentication.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

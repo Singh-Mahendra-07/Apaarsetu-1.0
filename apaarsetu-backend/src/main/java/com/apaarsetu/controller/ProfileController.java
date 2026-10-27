@@ -23,6 +23,23 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: ProfileController.java
+ * Package: com.apaarsetu.controller
+ * Component: ProfileController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Allows authenticated users across all roles to view and manage their personal profile, avatar, preferences, and security settings.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Exposes GET /profile/me returning user details from the authenticated UserPrincipal.
+ * 2. Exposes PUT /profile/preferences for persisting UI theme, language, and table density options.
+ * 3. Validates contact phone numbers and optional profile details.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequestMapping("/profile")

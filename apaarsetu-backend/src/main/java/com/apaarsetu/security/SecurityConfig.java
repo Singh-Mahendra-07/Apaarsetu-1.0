@@ -34,6 +34,23 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: SecurityConfig.java
+ * Package: com.apaarsetu.security
+ * Component: SecurityConfig (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Central Spring Security configuration defining the SecurityFilterChain, URL authorization rules, CORS, CSRF, and session policy.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Enforces stateless session management (SessionCreationPolicy.STATELESS) for JWT architecture.
+ * 2. Configures CORS to allow authorized frontend origins (e.g., http://localhost:3000).
+ * 3. Secures endpoints with role-based matchers and adds JWT, RateLimit, and PasswordChange filters to the chain.
+ * ============================================================================
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

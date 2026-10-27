@@ -25,6 +25,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: ActiveOfficialsController.java
+ * Package: com.apaarsetu.controller
+ * Component: ActiveOfficialsController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Provides endpoints for AICTE National Admins to monitor, audit, and inspect active institution admins and operators across India.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Exposes GET endpoints protected by @PreAuthorize for AICTE administrator roles.
+ * 2. Returns active user sessions, institutional affiliations, roles, and last-active timestamps.
+ * 3. Supports filtering by region zone, institution ID, and active status.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequestMapping("/active/officials")

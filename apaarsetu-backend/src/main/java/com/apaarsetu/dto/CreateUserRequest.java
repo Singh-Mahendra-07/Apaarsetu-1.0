@@ -1,3 +1,21 @@
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: CreateUserRequest.java
+ * Package: com.apaarsetu.dto
+ * Component: CreateUserRequest (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Defines the payload for provisioning new administrative or operator accounts by AICTE or Institution Admins.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Validates user email, full name, assigned UserRole, institution ID affiliation, and initial temporary password.
+ * 2. Annotated with Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor) for clean object lifecycle.
+ * 3. Enforces Jakarta Bean Validation rules (@NotBlank, @NotNull, @Size, @Pattern) before service processing.
+ * 4. Serialized to/from JSON and mapped 1-to-1 with Next.js TypeScript interfaces in types/api.ts.
+ * ============================================================================
+ */
 package com.apaarsetu.dto;
 
 import com.apaarsetu.domain.enums.UserRole;

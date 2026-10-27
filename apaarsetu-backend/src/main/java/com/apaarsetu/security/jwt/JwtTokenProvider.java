@@ -19,6 +19,23 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HexFormat;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: JwtTokenProvider.java
+ * Package: com.apaarsetu.security.jwt
+ * Component: JwtTokenProvider (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Handles cryptographic JWT creation, signing, claims extraction, and token validation.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Uses HMAC-SHA256 (HS256) with application secret key.
+ * 2. Embeds user claims (userId, role, institutionId, unique tokenId) in payload.
+ * 3. Validates token signature, expiration date, and format.
+ * ============================================================================
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

@@ -11,6 +11,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: NationalDashboardDTO.java
+ * Package: com.apaarsetu.dto
+ * Component: NationalDashboardDTO (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Provides aggregated macro-level national KPIs for the Ministry and AICTE executive leadership dashboard.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Aggregates total students enrolled nationwide, total accredited institutions, overall validation rate, and total capacity breaches.
+ * 2. Annotated with Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor) for clean object lifecycle.
+ * 3. Enforces Jakarta Bean Validation rules (@NotBlank, @NotNull, @Size, @Pattern) before service processing.
+ * 4. Serialized to/from JSON and mapped 1-to-1 with Next.js TypeScript interfaces in types/api.ts.
+ * ============================================================================
+ */
 @Data
 @Builder
 @NoArgsConstructor

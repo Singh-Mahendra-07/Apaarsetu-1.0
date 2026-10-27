@@ -7,6 +7,22 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: AsyncConfig.java
+ * Package: com.apaarsetu.config
+ * Component: AsyncConfig (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Component in the APAARSetu backend system supporting 'AsyncConfig' functionality.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Fulfills architectural requirements for AsyncConfig.
+ * 2. Integrates with the Spring Boot application context and associated domain services.
+ * ============================================================================
+ */
 @Configuration
 public class AsyncConfig {
 

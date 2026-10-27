@@ -11,6 +11,23 @@ import java.util.concurrent.TimeUnit;
  * Configures connection pool bounds, socket timeouts, and cluster selection timeouts
  * to prevent thread exhaustion and unhandled connection drop crashes.
  */
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: MongoConnectionConfig.java
+ * Package: com.apaarsetu.config
+ * Component: MongoConnectionConfig (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Configures custom Spring Data MongoDB settings, read/write converters, and database client behavior to ensure robust communication with the MongoDB cluster.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Extends AbstractMongoClientConfiguration or configures MongoClient beans.
+ * 2. Sets up SnakeCase and custom type converters for domain entities (Instant, Enums, Encrypted Strings).
+ * 3. Ensures connection pooling and cluster heartbeats are appropriately configured for high-concurrency registry workloads.
+ * ============================================================================
+ */
 @Configuration
 public class MongoConnectionConfig {
 

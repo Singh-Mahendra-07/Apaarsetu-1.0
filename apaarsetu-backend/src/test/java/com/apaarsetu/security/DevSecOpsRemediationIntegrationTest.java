@@ -33,6 +33,23 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: DevSecOpsRemediationIntegrationTest.java
+ * Package: com.apaarsetu.security
+ * Component: DevSecOpsRemediationIntegrationTest (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Integration and regression test suite verifying 'DevSecOpsRemediationIntegrationTest' security, business rules, and stability.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Uses SpringBootTest, MockMvc, and embedded or test MongoDB instances.
+ * 2. Asserts correct behavior for authorization, business constraints, and error envelopes.
+ * 3. Serves as automated regression prevention during continuous integration builds.
+ * ============================================================================
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("DevSecOps Vulnerability Remediation & Defensive Security Suite")

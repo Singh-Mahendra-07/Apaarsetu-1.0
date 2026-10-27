@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+============================================================================
+APAARSetu National Registry System — Maven Build Configuration
+============================================================================
+File: pom.xml
+
+REASON & ARCHITECTURAL PURPOSE:
+Defines project dependencies, Java 21 compilation targets, and build plugins
+for the Spring Boot 3.2.5 microservice architecture.
+
+WORKING & FUNCTIONAL FLOW:
+1. Imports Spring Boot Starter Web, Security, Data MongoDB, Validation, and Mail.
+2. Manages Lombok and MapStruct annotation processors for boilerplate reduction.
+3. Includes JJWT (Java JWT) for HMAC-SHA256 signature verification.
+4. Configures Spring Boot Maven plugin for executable fat-jar production packaging.
+============================================================================
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">

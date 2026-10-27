@@ -23,6 +23,24 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: StudentController.java
+ * Package: com.apaarsetu.controller
+ * Component: StudentController (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Primary REST controller for candidate registration, 12-digit APAAR lookups, student updates, and dispute evidence file uploads.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Exposes POST /students to register individual students with real-time validation.
+ * 2. Exposes GET /students with rich filtering (institutionId, program, year, validationStatus, keyword) and pagination.
+ * 3. Exposes GET /students/{id} and GET /students/search?apaarId=... for verified dossier inspection.
+ * 4. Exposes POST /students/{id}/evidence to store supporting verification documents into MongoDB GridFS.
+ * ============================================================================
+ */
 @Slf4j
 @RestController
 @RequestMapping("/students")

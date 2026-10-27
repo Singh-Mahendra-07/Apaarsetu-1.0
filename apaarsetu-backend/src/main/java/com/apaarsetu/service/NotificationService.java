@@ -9,6 +9,22 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: NotificationService.java
+ * Package: com.apaarsetu.service
+ * Component: NotificationService (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Dispatches transactional notifications (emails, system alerts) for critical security and regulatory events.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Sends password reset instructions, MFA setup alerts, and compliance violation warnings.
+ * 2. Integrates with Spring JavaMailSender with graceful fallback when mail servers are offline.
+ * ============================================================================
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

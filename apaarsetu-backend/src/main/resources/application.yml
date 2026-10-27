@@ -1,3 +1,21 @@
+# ============================================================================
+# APAARSetu National Registry System — Backend Configuration
+# ============================================================================
+# File: application.yml
+#
+# REASON & ARCHITECTURAL PURPOSE:
+# Central configuration manifest for the Spring Boot 3.2.5 backend service.
+# Governs network ports, context paths, MongoDB persistence URIs, JWT cryptographic
+# parameters, CORS origin whitelisting, file upload thresholds, and batch capacities.
+#
+# WORKING & FUNCTIONAL FLOW:
+# 1. server.port: Configures HTTP port 8081 with context-path /api/v1.
+# 2. spring.data.mongodb: Connects to MongoDB cluster with snake_case naming strategy.
+# 3. app.cors-origins: Whitelists Next.js frontend origin (http://localhost:3000).
+# 4. app.security: Defines HMAC-SHA256 JWT signing secret, token TTL, and AES-256 keys.
+# 5. app.rate-limit: Sets request rate limiting buckets per client IP address.
+# ============================================================================
+
 server:
   port: ${PORT:8081}
   servlet:

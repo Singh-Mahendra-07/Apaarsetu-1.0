@@ -39,6 +39,24 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * ============================================================================
+ * APAARSetu National Registry System — Backend Core Component
+ * ============================================================================
+ * File: BatchUploadService.java
+ * Package: com.apaarsetu.service
+ * Component: BatchUploadService (class)
+ *
+ * REASON & ARCHITECTURAL PURPOSE:
+ * Handles high-throughput asynchronous bulk student admissions from CSV spreadsheets, row validation, and batch commitment.
+ *
+ * WORKING & FUNCTIONAL FLOW:
+ * 1. Stores uploaded CSV in MongoDB GridFS and creates an initial UploadBatch record.
+ * 2. Streams CSV rows asynchronously using thread pools to conserve heap memory.
+ * 3. Validates each candidate via ValidationEngine (checking APAAR format, program capacity, duplicates).
+ * 4. Generates detailed error logs for invalid rows and updates batch status.
+ * ============================================================================
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
