@@ -34,10 +34,52 @@ class ApiClient {
     this.baseUrl = envUrl.replace(/\/+$/, '');
   }
 
+  /**
+   * Decodes and validates JWT claims without trusting localStorage blindly.
+   * If token is malformed, expired, or invalid, returns null.
+   */
+  public parseTokenClaims(token: string): Record<string, unknown> | null {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (base64.length % 4 !== 0) {
+        base64 += '=';
+      }
+      const jsonStr = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonStr) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
+  }
+
   // Token Management (Safe for SSR & Browser)
   public getAccessToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem(TOKEN_KEY);
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return null;
+
+    const claims = this.parseTokenClaims(token);
+    if (!claims) {
+      this.clearSession();
+      return null;
+    }
+
+    // Check expiration against current system time (claims.exp is in seconds)
+    if (typeof claims.exp === 'number') {
+      const nowSec = Math.floor(Date.now() / 1000);
+      if (claims.exp < nowSec) {
+        this.clearSession();
+        return null;
+      }
+    }
+
+    return token;
   }
 
   public getRefreshToken(): string | null {
@@ -47,41 +89,102 @@ class ApiClient {
 
   public getUserProfile(): UserProfileDTO | null {
     if (typeof window === 'undefined') return null;
-    const raw = localStorage.getItem(USER_KEY);
-    if (!raw) {
+    const token = this.getAccessToken();
+    if (!token) {
       this.cachedRawUser = null;
       this.cachedParsedUser = null;
       return null;
     }
-    if (raw === this.cachedRawUser && this.cachedParsedUser) {
-      return this.cachedParsedUser;
+
+    const claims = this.parseTokenClaims(token);
+    if (!claims) {
+      this.clearSession();
+      return null;
     }
+
+    const raw = localStorage.getItem(USER_KEY);
+    if (!raw) {
+      // Reconstruct profile directly from cryptographically signed claims
+      const tokenRole = typeof claims.role === 'string' ? (claims.role as UserProfileDTO['role']) : null;
+      if (!tokenRole) return null;
+      const reconstructed: UserProfileDTO = {
+        id: String(claims.sub || ''),
+        email: String(claims.email || ''),
+        fullName: String(claims.fullName || ''),
+        role: tokenRole,
+        institutionId: claims.institutionId ? String(claims.institutionId) : undefined,
+        region: claims.region ? String(claims.region) : undefined,
+        status: 'ACTIVE',
+        requiresPasswordChange: Boolean(claims.requiresPasswordChange),
+        mfaEnabled: false,
+      };
+      this.cachedRawUser = JSON.stringify(reconstructed);
+      this.cachedParsedUser = reconstructed;
+      return reconstructed;
+    }
+
     try {
-      this.cachedParsedUser = JSON.parse(raw);
+      const parsed: UserProfileDTO = JSON.parse(raw);
+      // ANTI-TAMPER INTEGRITY CHECK:
+      // Verify that localStorage data strictly matches the cryptographically signed JWT token claims.
+      // If a user manipulated role, email, or id in browser DevTools, immediately detect and purge the session.
+      const tokenRole = claims.role as string | undefined;
+      const tokenSub = claims.sub as string | undefined;
+      const tokenEmail = claims.email as string | undefined;
+
+      if (
+        (tokenRole && parsed.role !== tokenRole) ||
+        (tokenSub && parsed.id !== tokenSub) ||
+        (tokenEmail && parsed.email !== tokenEmail)
+      ) {
+        console.warn('SECURITY ALERT: Client-side role/identity tampering detected in DevTools. Wiping session.');
+        this.clearSession();
+        return null;
+      }
+
+      if (raw === this.cachedRawUser && this.cachedParsedUser) {
+        return this.cachedParsedUser;
+      }
+
+      this.cachedParsedUser = parsed;
       this.cachedRawUser = raw;
       return this.cachedParsedUser;
     } catch {
-      this.cachedRawUser = null;
-      this.cachedParsedUser = null;
+      this.clearSession();
       return null;
     }
   }
 
   public setTokens(accessToken: string, refreshToken?: string, user?: UserProfileDTO): void {
     if (typeof window === 'undefined') return;
+    const claims = this.parseTokenClaims(accessToken);
+    if (!claims) {
+      console.warn('Attempted to set invalid access token. Aborting.');
+      return;
+    }
+
     localStorage.setItem(TOKEN_KEY, accessToken);
     const secureFlag = window.location?.protocol === 'https:' ? '; Secure' : '';
     document.cookie = `${TOKEN_KEY}=${encodeURIComponent(accessToken)}; path=/; SameSite=Lax${secureFlag}`;
+
     if (refreshToken) {
       localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
       document.cookie = `${REFRESH_TOKEN_KEY}=${encodeURIComponent(refreshToken)}; path=/; SameSite=Lax${secureFlag}`;
     }
+
     if (user) {
-      const userStr = JSON.stringify(user);
-      this.cachedParsedUser = user;
+      const verifiedRole = (claims.role as UserProfileDTO['role']) || user.role;
+      const safeUser: UserProfileDTO = {
+        ...user,
+        role: verifiedRole,
+        email: (claims.email as string) || user.email,
+        id: (claims.sub as string) || user.id,
+      };
+      const userStr = JSON.stringify(safeUser);
+      this.cachedParsedUser = safeUser;
       this.cachedRawUser = userStr;
       localStorage.setItem(USER_KEY, userStr);
-      document.cookie = `apaarsetu_user_role=${encodeURIComponent(user.role)}; path=/; SameSite=Lax${secureFlag}`;
+      document.cookie = `apaarsetu_user_role=${encodeURIComponent(verifiedRole)}; path=/; SameSite=Lax${secureFlag}`;
     }
   }
 

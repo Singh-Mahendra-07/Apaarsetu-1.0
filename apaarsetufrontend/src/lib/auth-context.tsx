@@ -32,19 +32,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storedToken = apiClient.getAccessToken();
     const storedUser = apiClient.getUserProfile();
 
-    if (storedToken) {
+    if (storedToken && storedUser) {
       setToken(storedToken);
-      if (storedUser) setUser(storedUser);
+      setUser(storedUser);
 
       try {
         const freshUser = await authApi.getMe();
-        setUser(freshUser);
+        if (freshUser) {
+          if (freshUser.role !== storedUser.role) {
+            console.warn('Backend role mismatch detected during session reconciliation.');
+          }
+          setUser(freshUser);
+        }
       } catch {
-        // Token might have expired
+        // Token might have expired, revoked, or failed server validation
         apiClient.clearSession();
         setUser(null);
         setToken(null);
       }
+    } else {
+      // Incomplete, expired, or tampered token/profile
+      apiClient.clearSession();
+      setUser(null);
+      setToken(null);
     }
     setIsLoading(false);
   }, []);
