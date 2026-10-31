@@ -44,9 +44,7 @@ services:
   # 2. Spring Boot 3.2 Backend Microservice
   # --------------------------------------------------------------------------
   backend:
-    build:
-      context: ./apaarsetu-backend
-      dockerfile: Dockerfile
+    image: ghcr.io/singh-mahendra-07/apaarsetu-backend:latest
     container_name: apaarsetu-backend
     restart: unless-stopped
     depends_on:
@@ -91,9 +89,7 @@ services:
   # 3. Next.js 16 Standalone Frontend
   # --------------------------------------------------------------------------
   frontend:
-    build:
-      context: ./apaarsetufrontend
-      dockerfile: Dockerfile
+    image: ghcr.io/singh-mahendra-07/apaarsetu-frontend:latest
     container_name: apaarsetu-frontend
     restart: unless-stopped
     depends_on:
