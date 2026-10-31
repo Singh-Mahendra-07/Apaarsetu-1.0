@@ -81,6 +81,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Normalize GHCR image namespace
+        run: echo "GHCR_NAMESPACE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+
       - name: Build & Push Backend Container Image
         uses: docker/build-push-action@v5
         with:
@@ -88,8 +91,8 @@ jobs:
           file: ./apaarsetu-backend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/apaarsetu-backend:latest
-            ghcr.io/${{ github.repository_owner }}/apaarsetu-backend:${{ github.sha }}
+            ${{ env.GHCR_NAMESPACE }}/apaarsetu-backend:latest
+            ${{ env.GHCR_NAMESPACE }}/apaarsetu-backend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -100,8 +103,8 @@ jobs:
           file: ./apaarsetufrontend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/apaarsetu-frontend:latest
-            ghcr.io/${{ github.repository_owner }}/apaarsetu-frontend:${{ github.sha }}
+            ${{ env.GHCR_NAMESPACE }}/apaarsetu-frontend:latest
+            ${{ env.GHCR_NAMESPACE }}/apaarsetu-frontend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -145,4 +148,3 @@ jobs:
             done
             echo "ERROR: Health check failed! Initiating automated rollback..."
             exit 1
-
