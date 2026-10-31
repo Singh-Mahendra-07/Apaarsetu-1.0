@@ -52,6 +52,6 @@ public class VerifiedCredentialDTO {
 
     @JsonProperty("verificationStatus")
     public String getVerificationStatus() {
-        return "VERIFIED";
+        return "AUTHENTIC_VALIDATED".equalsIgnoreCase(sealStatus) ? "VERIFIED" : "UNVERIFIED";
     }
 }

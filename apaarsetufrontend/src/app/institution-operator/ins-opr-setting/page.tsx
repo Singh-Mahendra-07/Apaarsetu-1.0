@@ -4,15 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Settings,
-  User,
-  Mail,
   ShieldCheck,
-  Building2,
   Lock,
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Key,
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -61,11 +57,11 @@ export default function OperatorSettingsPage() {
 
     setBusy(true);
     try {
-      await apiClient.post("/auth/change-password", {
+      await apiClient.put("/profile/password", {
         currentPassword,
         newPassword,
       });
-      setToast({ ok: true, text: "Password changed successfully." });
+      setToast({ ok: true, text: "Password updated successfully across national registries." });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -82,7 +78,7 @@ export default function OperatorSettingsPage() {
     try {
       await logout();
     } finally {
-      router.push("/officials-login");
+      router.push("/login");
     }
   };
 
@@ -93,11 +89,10 @@ export default function OperatorSettingsPage() {
         <div
           role="status"
           aria-live="polite"
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-xl ring-1 transition animate-in fade-in slide-in-from-bottom-4 ${
-            toast.ok
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-xl ring-1 transition animate-in fade-in slide-in-from-bottom-4 ${toast.ok
               ? "bg-slate-900 text-white ring-slate-800"
               : "bg-red-600 text-white ring-red-700"
-          }`}
+            }`}
         >
           {toast.ok ? (
             <CheckCircle2 className="h-5 w-5 text-emerald-400" />

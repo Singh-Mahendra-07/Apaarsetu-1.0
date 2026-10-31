@@ -4,7 +4,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Building2, Save } from "lucide-react";
+import { ArrowLeft, Building2, Save, Loader2, CheckCircle2 } from "lucide-react";
+import { institutionApi } from "@/lib/api";
 
 export default function AddInstitutionPage() {
   const router = useRouter();
@@ -28,6 +29,8 @@ export default function AddInstitutionPage() {
   });
 
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [busy, setBusy] = useState(false);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -35,9 +38,10 @@ export default function AddInstitutionPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     const intake = Number(form.approvedIntake);
 
@@ -56,14 +60,25 @@ export default function AddInstitutionPage() {
       return;
     }
 
-    // Frontend demonstration only.
-    // Connect this form to your backend POST API to save the record.
-    console.log("Institution registration data:", {
-      ...form,
-      approvedIntake: intake,
-    });
-
-    alert("Form validated. Connect the backend API to save the institution.");
+    setBusy(true);
+    try {
+      await institutionApi.createInstitution({
+        aicteId: form.aicteId,
+        name: form.institutionName,
+        type: form.institutionType,
+        state: form.state,
+        city: form.city,
+        zone: "NORTH",
+        universityAffiliation: form.universityName,
+        approvedPrograms: [],
+      });
+      setSuccess("Institution successfully recorded in the national accreditation registry.");
+      setTimeout(() => router.push("/aicte-admin/institution-management"), 1500);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to record institution. Please verify required fields.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   const inputClass =
@@ -332,10 +347,23 @@ export default function AddInstitutionPage() {
           </p>
         )}
 
+        {error && (
+          <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700 flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+            <span>{success}</span>
+          </div>
+        )}
+
         <div className="flex flex-wrap justify-end gap-3 pb-8">
           <button
             type="button"
-            onClick={() => router.push("/aicte-admin/institutions")}
+            onClick={() => router.push("/aicte-admin/institution-management")}
             className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
           >
             Cancel
@@ -343,10 +371,11 @@ export default function AddInstitutionPage() {
 
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white hover:bg-violet-700"
+            disabled={busy}
+            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60 transition"
           >
-            <Save size={17} />
-            Validate Institution
+            {busy ? <Loader2 size={17} className="animate-spin" /> : <Save size={17} />}
+            Accredit &amp; Register Institution
           </button>
         </div>
       </form>

@@ -1,24 +1,18 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Bell,
   CheckCircle2,
   ChevronDown,
   GraduationCap,
   Loader2,
-  LogOut,
   RefreshCw,
   Search,
-  Settings,
   ShieldCheck,
-  UserCheck,
   X,
 } from "lucide-react";
 import { dashboardApi, institutionApi, apiClient } from "@/lib/api";
-import { useAuth } from "@/lib/auth-context";
 import { InstitutionResponseDTO } from "@/types/api";
 import InstitutionAdminProfileDropdown from "@/components/layout/InstitutionAdminProfileDropdown";
 
@@ -172,9 +166,6 @@ function Card({
 
 /* ============ PAGE COMPONENT ============ */
 export default function InstitutionProfilePage() {
-  const router = useRouter();
-  const { user, logout } = useAuth();
-
   const [inst, setInst] = useState<Institution | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
@@ -621,10 +612,10 @@ export default function InstitutionProfilePage() {
                 </div>
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${inst.approvalStatus === "APPROVED"
-                      ? "bg-emerald-50 text-emerald-700"
-                      : inst.approvalStatus === "PENDING"
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-red-50 text-red-700"
+                    ? "bg-emerald-50 text-emerald-700"
+                    : inst.approvalStatus === "PENDING"
+                      ? "bg-amber-50 text-amber-700"
+                      : "bg-red-50 text-red-700"
                     }`}
                 >
                   <CheckCircle2 className="h-3.5 w-3.5" />{" "}

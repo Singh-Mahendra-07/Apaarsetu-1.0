@@ -33,7 +33,7 @@ export default function OfficerProfileDropdown() {
     try {
       await logout();
     } finally {
-      router.push("/officials-login");
+      router.push("/login");
     }
   };
 

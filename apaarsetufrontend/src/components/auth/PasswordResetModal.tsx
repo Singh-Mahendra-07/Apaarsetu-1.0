@@ -13,7 +13,6 @@ import {
   Loader2,
   Sparkles,
   LogOut,
-  Building2,
   UserCheck,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
@@ -70,7 +69,7 @@ export default function PasswordResetModal() {
       }
     };
 
-    const handlePopState = (e: PopStateEvent) => {
+    const handlePopState = () => {
       // Force stay on current route during lockout
       window.history.pushState(null, '', window.location.href);
     };
@@ -216,14 +215,12 @@ export default function PasswordResetModal() {
                 <button
                   type="button"
                   onClick={toggleAutoGen}
-                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-                    autoGen ? 'bg-indigo-600' : 'bg-slate-300'
-                  }`}
+                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${autoGen ? 'bg-indigo-600' : 'bg-slate-300'
+                    }`}
                 >
                   <span
-                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${
-                      autoGen ? 'left-[22px]' : 'left-0.5'
-                    }`}
+                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${autoGen ? 'left-[22px]' : 'left-0.5'
+                      }`}
                   />
                 </button>
               </div>
@@ -354,9 +351,8 @@ function CheckItem({ met, label }: { met: boolean; label: string }) {
   return (
     <div className="flex items-center gap-2">
       <div
-        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full transition-colors ${
-          met ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'
-        }`}
+        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full transition-colors ${met ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'
+          }`}
       >
         <CheckCircle2 className="h-3 w-3" />
       </div>

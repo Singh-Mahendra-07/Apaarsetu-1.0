@@ -1,28 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type DragEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
 import Link from "next/link";
 import {
-  Bell,
   Check,
-  ChevronDown,
   Download,
   ExternalLink,
   FileSpreadsheet,
   Loader2,
   Pencil,
   RefreshCw,
-  Search,
   ShieldCheck,
   UploadCloud,
-  X,
   AlertCircle,
   CheckCircle2,
   AlertTriangle,
   FileText,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { batchApi, institutionApi, apiClient } from "@/lib/api";
+import { batchApi, apiClient } from "@/lib/api";
 import { BatchResponseDTO, ApprovedProgramDTO } from "@/types/api";
 import InstitutionOperatorProfileDropdown from "@/components/layout/InstitutionOperatorProfileDropdown";
 
@@ -40,17 +36,16 @@ const MAX_UPLOAD_MB = 25;
 const IN_FLIGHT = ["UPLOADING", "PARSING", "VALIDATING", "PROCESSING"];
 
 /* ============ HELPERS ============ */
-const pct = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 100) : 0);
 function ago(iso?: string) {
   if (!iso) return "recently";
   const m = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
   return m < 1
     ? "just now"
     : m < 60
-    ? `${m} minute${m === 1 ? "" : "s"} ago`
-    : m < 1440
-    ? `${Math.round(m / 60)} hours ago`
-    : `${Math.round(m / 1440)} days ago`;
+      ? `${m} minute${m === 1 ? "" : "s"} ago`
+      : m < 1440
+        ? `${Math.round(m / 60)} hours ago`
+        : `${Math.round(m / 1440)} days ago`;
 }
 
 function Stepper({ b }: { b: BatchResponseDTO }) {
@@ -63,8 +58,8 @@ function Stepper({ b }: { b: BatchResponseDTO }) {
   const lastLabel = isFailed
     ? "Rejected / Failed"
     : isNeedsAction
-    ? "Needs Action"
-    : "Validated Ready";
+      ? "Needs Action"
+      : "Validated Ready";
 
   const labels = ["Uploaded", "Parsed", "Validation Verified", lastLabel];
 
@@ -76,21 +71,20 @@ function Stepper({ b }: { b: BatchResponseDTO }) {
         const finalTone = isFailed
           ? "text-red-600 font-semibold"
           : isNeedsAction
-          ? "text-amber-700 font-semibold"
-          : "text-emerald-700 font-semibold";
+            ? "text-amber-700 font-semibold"
+            : "text-emerald-700 font-semibold";
 
         return (
           <li
             key={l}
-            className={`flex items-center gap-1 font-medium ${
-              done
+            className={`flex items-center gap-1 font-medium ${done
                 ? "text-emerald-700"
                 : active
-                ? idx === 3
-                  ? finalTone
-                  : "text-indigo-700"
-                : "text-slate-400"
-            }`}
+                  ? idx === 3
+                    ? finalTone
+                    : "text-indigo-700"
+                  : "text-slate-400"
+              }`}
           >
             <span>
               {i + 1}. {l}
@@ -273,11 +267,10 @@ export default function BulkUploadPage() {
         <div
           role="status"
           aria-live="polite"
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-xl ring-1 transition animate-in fade-in slide-in-from-bottom-4 ${
-            toast.ok
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-xl ring-1 transition animate-in fade-in slide-in-from-bottom-4 ${toast.ok
               ? "bg-slate-900 text-white ring-slate-800"
               : "bg-red-600 text-white ring-red-700"
-          }`}
+            }`}
         >
           {toast.ok ? (
             <CheckCircle2 className="h-5 w-5 text-emerald-400" />
@@ -420,13 +413,12 @@ export default function BulkUploadPage() {
               onDragLeave={() => setDrag(false)}
               onDrop={handleDrop}
               onClick={() => fileRef.current?.click()}
-              className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition cursor-pointer ${
-                drag
+              className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition cursor-pointer ${drag
                   ? "border-indigo-600 bg-indigo-50/50"
                   : file
-                  ? "border-emerald-500 bg-emerald-50/30"
-                  : "border-slate-300 hover:border-indigo-400 bg-slate-50/50"
-              }`}
+                    ? "border-emerald-500 bg-emerald-50/30"
+                    : "border-slate-300 hover:border-indigo-400 bg-slate-50/50"
+                }`}
             >
               <input
                 type="file"

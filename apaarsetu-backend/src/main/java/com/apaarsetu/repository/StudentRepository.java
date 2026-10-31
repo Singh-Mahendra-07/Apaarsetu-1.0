@@ -2,6 +2,7 @@ package com.apaarsetu.repository;
 
 import com.apaarsetu.domain.Student;
 import com.apaarsetu.domain.enums.AdmissionStatus;
+import com.apaarsetu.domain.enums.SeatCategory;
 import com.apaarsetu.domain.enums.ValidationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +44,7 @@ public interface StudentRepository extends MongoRepository<Student, String> {
     long countByInstitutionIdAndAcademicYear(String institutionId, String academicYear);
     long countByInstitutionIdAndProgramCodeAndAcademicYear(String institutionId, String programCode, String academicYear);
     long countByInstitutionIdAndProgramCodeAndAcademicYearAndAdmissionStatus(String institutionId, String programCode, String academicYear, AdmissionStatus admissionStatus);
+    long countByInstitutionIdAndProgramCodeAndAcademicYearAndSeatCategoryAndAdmissionStatus(String institutionId, String programCode, String academicYear, SeatCategory seatCategory, AdmissionStatus admissionStatus);
 
     long countByValidationStatus(ValidationStatus status);
     long countByAdmissionStatus(AdmissionStatus status);

@@ -24,16 +24,36 @@ function base64UrlToUint8Array(base64Url: string): Uint8Array {
 }
 
 /**
- * Cryptographically verifies an HMAC-SHA256 signed JWT in Next.js Edge Runtime
+ * Cryptographically verifies an HMAC-signed JWT (HS256, HS384, HS512) in Next.js Edge Runtime
  * using the standard Web Crypto API (crypto.subtle).
  */
 export async function verifyJwtEdge(token: string, secret: string): Promise<JwtPayload | null> {
   try {
-    const parts = token.split('.');
+    const rawToken = token.startsWith('Bearer ') ? token.slice(7) : token;
+    const cleanToken = decodeURIComponent(rawToken.trim()).replace(/^["']|["']$/g, '');
+    const parts = cleanToken.split('.');
     if (parts.length !== 3) {
       return null;
     }
     const [headerB64, payloadB64, signatureB64] = parts;
+
+    // Decode header to detect HMAC algorithm dynamically
+    let hashAlg = 'SHA-256';
+    try {
+      const headerJson = new TextDecoder().decode(base64UrlToUint8Array(headerB64));
+      const header = JSON.parse(headerJson) as { alg?: string };
+      if (header.alg === 'HS512') {
+        hashAlg = 'SHA-512';
+      } else if (header.alg === 'HS384') {
+        hashAlg = 'SHA-384';
+      } else if (header.alg === 'HS256') {
+        hashAlg = 'SHA-256';
+      } else {
+        return null; // Reject unrecognized or non-HMAC algorithms for security
+      }
+    } catch {
+      return null;
+    }
 
     const enc = new TextEncoder();
     const data = enc.encode(`${headerB64}.${payloadB64}`);
@@ -42,7 +62,7 @@ export async function verifyJwtEdge(token: string, secret: string): Promise<JwtP
     const cryptoKey = await crypto.subtle.importKey(
       'raw',
       keyData as unknown as BufferSource,
-      { name: 'HMAC', hash: 'SHA-256' },
+      { name: 'HMAC', hash: hashAlg },
       false,
       ['verify']
     );
@@ -87,37 +107,53 @@ export async function verifyJwtEdge(token: string, secret: string): Promise<JwtP
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Eliminate redundant duplicate login pages by redirecting to unified /login
+  const legacyLoginRoutes = [
+    '/aicte-login-admin',
+    '/aicte-login-officer',
+    '/institution-login-admin',
+    '/institution-login-operator',
+    '/authorized-verifier-login',
+    '/officials-login',
+    '/aicte',
+    '/instituition',
+  ];
+  if (legacyLoginRoutes.includes(pathname)) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
   const token = request.cookies.get('apaarsetu_access_token')?.value;
 
   const routeRules = [
     {
       prefix: '/aicte-admin',
-      login: '/aicte-login-admin',
+      login: '/login',
       allowedRoles: ['ROLE_AICTE_ADMIN'],
     },
     {
       prefix: '/aicte-officer',
-      login: '/aicte-login-officer',
+      login: '/login',
       allowedRoles: ['ROLE_AICTE_OFFICER', 'ROLE_AICTE_ADMIN'],
     },
     {
       prefix: '/institution-admin',
-      login: '/institution-login-admin',
+      login: '/login',
       allowedRoles: ['ROLE_INSTITUTION_ADMIN'],
     },
     {
       prefix: '/institution-operator',
-      login: '/institution-login-operator',
+      login: '/login',
       allowedRoles: ['ROLE_INSTITUTION_OPERATOR', 'ROLE_INSTITUTION_ADMIN'],
     },
     {
       prefix: '/authorized-verifier',
-      login: '/authorized-verifier-login',
+      login: '/login',
       allowedRoles: ['ROLE_AUTHORIZED_VERIFIER'],
     },
     {
       prefix: '/api-status',
-      login: '/aicte-login-admin',
+      login: '/login',
       allowedRoles: ['ROLE_AICTE_ADMIN'],
     },
   ];
@@ -130,8 +166,15 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
       }
 
-      const secret = process.env.JWT_SECRET || 'apaarsetu-super-secret-jwt-key-for-development-only-change-in-prod-256bit';
-      const claims = await verifyJwtEdge(token, secret);
+      const secret = process.env.JWT_SECRET;
+      if (!secret && process.env.NODE_ENV === 'production') {
+        console.error('CRITICAL: JWT_SECRET environment variable is missing in production');
+        const loginUrl = new URL(rule.login, request.url);
+        loginUrl.searchParams.set('error', 'security_config_error');
+        return NextResponse.redirect(loginUrl);
+      }
+      const effectiveSecret = secret || 'ApaarSetuSecretKey2026MasterJwtTokenSignatureForNationalRegistryHS256SuperSecureProductionKey';
+      const claims = await verifyJwtEdge(token, effectiveSecret);
 
       if (!claims || !claims.role) {
         const loginUrl = new URL(rule.login, request.url);
@@ -159,5 +202,13 @@ export const config = {
     '/institution-operator/:path*',
     '/authorized-verifier/:path*',
     '/api-status/:path*',
+    '/aicte-login-admin',
+    '/aicte-login-officer',
+    '/institution-login-admin',
+    '/institution-login-operator',
+    '/authorized-verifier-login',
+    '/officials-login',
+    '/aicte',
+    '/instituition',
   ],
 };

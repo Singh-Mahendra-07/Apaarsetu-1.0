@@ -4,13 +4,10 @@ import { useCallback, useEffect, useRef, useState, type DragEvent, type ReactNod
 import Link from "next/link";
 import {
   Calendar,
-  ChevronDown,
   Download,
   Loader2,
   Pencil,
-  Plus,
   RefreshCw,
-  Search,
   Send,
   ShieldCheck,
   UploadCloud,
@@ -19,11 +16,10 @@ import {
   CheckCircle2,
   FileSpreadsheet,
   AlertTriangle,
-  FileText,
   UserCheck,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { batchApi, dashboardApi, studentApi, apiClient, institutionApi } from "@/lib/api";
+import { batchApi, dashboardApi, studentApi, apiClient } from "@/lib/api";
 import {
   BatchResponseDTO,
   BatchErrorDTO,
@@ -54,10 +50,10 @@ function ago(iso?: string) {
   return m < 1
     ? "just now"
     : m < 60
-    ? `${m}m ago`
-    : m < 1440
-    ? `${Math.round(m / 60)}h ago`
-    : `${Math.round(m / 1440)}d ago`;
+      ? `${m}m ago`
+      : m < 1440
+        ? `${Math.round(m / 60)}h ago`
+        : `${Math.round(m / 1440)}d ago`;
 }
 
 const fmtApaar = (v: string) =>
@@ -369,10 +365,6 @@ export default function OperatorDashboardPage() {
     setBusy("single");
     setStErr({});
     try {
-      const parts = st.name.trim().split(" ");
-      const firstName = parts[0];
-      const lastName = parts.slice(1).join(" ") || "Student";
-
       await studentApi.createStudent({
         fullName: st.name.trim(),
         apaarId: rawApaar,
@@ -418,7 +410,7 @@ export default function OperatorDashboardPage() {
         initialVals[`${r.row}-${r.field}`] = r.currentValue;
       });
       setFixVals(initialVals);
-    } catch (e: unknown) {
+    } catch {
       setFixErr("Failed to fetch batch validation errors.");
     } finally {
       setFixLoading(false);
@@ -456,11 +448,10 @@ export default function OperatorDashboardPage() {
         <div
           role="status"
           aria-live="polite"
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-xl ring-1 transition animate-in fade-in slide-in-from-bottom-4 ${
-            toast.ok
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-xl ring-1 transition animate-in fade-in slide-in-from-bottom-4 ${toast.ok
               ? "bg-slate-900 text-white ring-slate-800"
               : "bg-red-600 text-white ring-red-700"
-          }`}
+            }`}
         >
           {toast.ok ? (
             <CheckCircle2 className="h-5 w-5 text-emerald-400" />
@@ -611,13 +602,12 @@ export default function OperatorDashboardPage() {
                 onDragLeave={() => setDrag(false)}
                 onDrop={handleDrop}
                 onClick={() => fileRef.current?.click()}
-                className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition cursor-pointer ${
-                  drag
+                className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition cursor-pointer ${drag
                     ? "border-indigo-600 bg-indigo-50/50"
                     : file
-                    ? "border-emerald-500 bg-emerald-50/30"
-                    : "border-slate-300 hover:border-indigo-400 bg-slate-50/50"
-                }`}
+                      ? "border-emerald-500 bg-emerald-50/30"
+                      : "border-slate-300 hover:border-indigo-400 bg-slate-50/50"
+                  }`}
               >
                 <input
                   type="file"
@@ -899,13 +889,12 @@ export default function OperatorDashboardPage() {
                     </div>
                     <div className="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden">
                       <div
-                        className={`h-full transition-all duration-500 rounded-full ${
-                          isFull
+                        className={`h-full transition-all duration-500 rounded-full ${isFull
                             ? "bg-red-500"
                             : fillPct > 80
-                            ? "bg-amber-500"
-                            : "bg-indigo-600"
-                        }`}
+                              ? "bg-amber-500"
+                              : "bg-indigo-600"
+                          }`}
                         style={{ width: `${Math.min(100, fillPct)}%` }}
                       />
                     </div>

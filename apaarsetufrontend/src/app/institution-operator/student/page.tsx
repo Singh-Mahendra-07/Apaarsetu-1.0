@@ -5,13 +5,9 @@ import Link from "next/link";
 import {
   Search,
   UserCheck,
-  GraduationCap,
   Loader2,
   RefreshCw,
   Plus,
-  ShieldCheck,
-  AlertCircle,
-  Filter,
   CheckCircle2,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
@@ -206,11 +202,10 @@ export default function OperatorStudentManagementPage() {
                     </td>
                     <td className="py-3.5 px-4">
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                          s.admissionStatus === "ADMITTED_ACTIVE"
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${s.admissionStatus === "ADMITTED_ACTIVE"
                             ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                             : "bg-amber-50 text-amber-700 border border-amber-200"
-                        }`}
+                          }`}
                       >
                         <CheckCircle2 className="h-3 w-3" />
                         {s.admissionStatus || "ACTIVE"}

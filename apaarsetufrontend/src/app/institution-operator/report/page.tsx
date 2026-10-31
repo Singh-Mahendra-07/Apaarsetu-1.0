@@ -12,7 +12,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { dashboardApi, apiClient } from "@/lib/api";
+import { dashboardApi } from "@/lib/api";
 import InstitutionOperatorProfileDropdown from "@/components/layout/InstitutionOperatorProfileDropdown";
 
 export default function OperatorReportsPage() {
@@ -54,11 +54,10 @@ export default function OperatorReportsPage() {
         <div
           role="status"
           aria-live="polite"
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-xl ring-1 transition animate-in fade-in slide-in-from-bottom-4 ${
-            toast.ok
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-xl ring-1 transition animate-in fade-in slide-in-from-bottom-4 ${toast.ok
               ? "bg-slate-900 text-white ring-slate-800"
               : "bg-red-600 text-white ring-red-700"
-          }`}
+            }`}
         >
           {toast.ok ? (
             <CheckCircle2 className="h-5 w-5 text-emerald-400" />

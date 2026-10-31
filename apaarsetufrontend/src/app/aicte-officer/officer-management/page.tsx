@@ -1,11 +1,18 @@
-import React from 'react'
+"use client";
 
-function page() {
+import { ShieldAlert } from "lucide-react";
+import SubsystemPlaceholder from "@/components/layout/SubsystemPlaceholder";
+
+export default function OfficerManagementRestrictedPage() {
   return (
-    <div>
-      office-management
-    </div>
-  )
+    <SubsystemPlaceholder
+      portalTitle="AICTE Officer"
+      portalDashboardHref="/aicte-officer"
+      subsystemTitle="Officer Management (Restricted to Central Admin)"
+      description="Officer account provisioning, regional zone reassignments, and administrative privilege escalation are strictly restricted to the Central AICTE Administration governance team."
+      icon={ShieldAlert}
+      backendEndpoint="GET /api/v1/admin/officers"
+      plannedRelease="Central Administrative Authority Restricted"
+    />
+  );
 }
-
-export default page

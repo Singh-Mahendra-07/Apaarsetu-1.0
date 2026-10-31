@@ -1,17 +1,14 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   AlertTriangle,
   ArrowLeft,
   Bell,
   CheckCircle2,
-  ChevronDown,
   Loader2,
-  LogOut,
-  Settings,
   ShieldCheck,
   X,
 } from "lucide-react";
@@ -81,8 +78,7 @@ const td = "border-t border-slate-200 px-3 py-3 text-sm text-slate-700";
 
 /* ============ AUDIT PAGE COMPONENT ============ */
 function AuditPage() {
-  const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const batchId = searchParams.get("batchId") || "";
 
@@ -243,7 +239,7 @@ function AuditPage() {
     } finally {
       setLoading(false);
     }
-  }, [batchId, user?.institutionId]);
+  }, [batchId, user]);
 
   useEffect(() => {
     load();
@@ -307,7 +303,7 @@ function AuditPage() {
               }`}
           >
             <span className={`h-2 w-2 rounded-full ${apiOk ? "bg-emerald-500" : "bg-red-500"}`} />
-            {apiOk ? "API Connected (Port 8081)" : "API Unreachable (Port 8081)"}
+            {apiOk ? "National Gateway Operational" : "National Gateway Offline"}
           </span>
           <span className="hidden text-xs font-medium text-slate-600 md:inline">
             [{institutionLabel}]
@@ -452,8 +448,8 @@ function AuditPage() {
                     aria-selected={tab === k}
                     onClick={() => setTab(k)}
                     className={`-mb-px inline-flex items-center gap-2 border-b-2 px-3 py-2 text-sm font-semibold ${tab === k
-                        ? "border-indigo-600 text-indigo-700"
-                        : "border-transparent text-slate-500 hover:text-slate-800"
+                      ? "border-indigo-600 text-indigo-700"
+                      : "border-transparent text-slate-500 hover:text-slate-800"
                       }`}
                   >
                     {icon}

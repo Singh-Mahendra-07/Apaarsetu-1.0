@@ -17,21 +17,6 @@ type AuditLog = {
   clientIp: string;
 };
 
-/* ------------------------------ Sample data ------------------------------ */
-// Shown only if GET /api/v1/audit-logs can't be reached.
-
-const SAMPLE: AuditLog[] = [
-  { id: "1", timestamp: "2026-10-23T21:19:04", action: "LOGIN", actorEmail: "admin@aicte.gov.in", actorRole: "ROLE_AICTE_ADMIN", clientIp: "127.0.0.1" },
-  { id: "2", timestamp: "2026-10-23T19:10:10", action: "LOGIN", actorEmail: "admin@ditm.ac.in", actorRole: "ROLE_INSTITUTION_ADMIN", clientIp: "127.0.0.1" },
-  { id: "3", timestamp: "2026-10-23T19:08:27", action: "LOGIN", actorEmail: "admin@aicte.gov.in", actorRole: "ROLE_AICTE_ADMIN", clientIp: "127.0.0.1" },
-  { id: "4", timestamp: "2026-10-23T19:08:15", action: "LOGIN", actorEmail: "admin@aicte.gov.in", actorRole: "ROLE_AICTE_ADMIN", clientIp: "127.0.0.1" },
-  { id: "5", timestamp: "2026-10-23T08:19:42", action: "LOGIN", actorEmail: "verifier@tcs.com", actorRole: "ROLE_AUTHORIZED_VERIFIER", clientIp: "127.0.0.1" },
-  { id: "6", timestamp: "2026-10-23T08:19:25", action: "LOGIN", actorEmail: "operator@ditm.ac.in", actorRole: "ROLE_INSTITUTION_OPERATOR", clientIp: "127.0.0.1" },
-  { id: "7", timestamp: "2026-10-23T08:19:14", action: "LOGIN", actorEmail: "admin@ditm.ac.in", actorRole: "ROLE_INSTITUTION_ADMIN", clientIp: "127.0.0.1" },
-  { id: "8", timestamp: "2026-10-23T08:19:05", action: "LOGOUT", actorEmail: "admin@aicte.gov.in", actorRole: "ROLE_AICTE_ADMIN", clientIp: "127.0.0.1" },
-  { id: "9", timestamp: "2026-10-23T08:18:54", action: "LOGIN", actorEmail: "admin@aicte.gov.in", actorRole: "ROLE_AICTE_ADMIN", clientIp: "127.0.0.1" },
-  { id: "10", timestamp: "2026-10-23T08:18:43", action: "LOGOUT", actorEmail: "officer@aicte.gov.in", actorRole: "ROLE_AICTE_OFFICER", clientIp: "127.0.0.1" },
-];
 
 /* -------------------------------- Helpers -------------------------------- */
 
@@ -49,13 +34,13 @@ const formatTime = (iso: string) => {
   return Number.isNaN(d.getTime())
     ? iso
     : d.toLocaleString("en-US", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit",
-      });
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+    });
 };
 
 const formatTarget = (log: AuditLog) =>
@@ -107,14 +92,13 @@ export default function AuditLogsPage() {
 
         <div className="flex items-center gap-4">
           <span
-            className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-              apiUp
+            className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${apiUp
                 ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                 : "border-red-200 bg-red-50 text-red-700"
-            }`}
+              }`}
           >
             <span className={`h-2 w-2 rounded-full ${apiUp ? "bg-emerald-500" : "bg-red-500"}`} />
-            {apiUp ? "API Connected (Port 8081)" : "API Unreachable (Port 8081)"}
+            {apiUp ? "National Gateway Operational" : "National Gateway Offline"}
           </span>
           <button
             aria-label="Notifications"
@@ -198,9 +182,8 @@ export default function AuditLogsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`rounded px-2 py-0.5 text-xs font-semibold ${
-                          ACTION_CLS[log.action] ?? "bg-slate-100 text-slate-700"
-                        }`}
+                        className={`rounded px-2 py-0.5 text-xs font-semibold ${ACTION_CLS[log.action] ?? "bg-slate-100 text-slate-700"
+                          }`}
                       >
                         {log.action}
                       </span>

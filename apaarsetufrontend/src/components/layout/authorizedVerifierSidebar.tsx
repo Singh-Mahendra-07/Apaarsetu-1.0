@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { LogOut, User, Settings } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 
 const menuItems = [
   {
@@ -64,7 +64,7 @@ export default function AuthorizedVerifierSidebar() {
     try {
       await logout();
     } finally {
-      router.push("/officials-login");
+      router.push("/login");
     }
   };
 
@@ -94,7 +94,7 @@ export default function AuthorizedVerifierSidebar() {
               item.path === "/authorized-verifier"
                 ? pathname === item.path
                 : pathname === item.path ||
-                  pathname.startsWith(item.path + "/")
+                pathname.startsWith(item.path + "/")
             );
 
             return (
@@ -102,11 +102,10 @@ export default function AuthorizedVerifierSidebar() {
                 key={item.path}
                 href={item.path}
                 suppressHydrationWarning
-                className={`flex items-center gap-3 rounded-xl px-4 py-2.5 transition ${
-                  active
+                className={`flex items-center gap-3 rounded-xl px-4 py-2.5 transition ${active
                     ? "bg-violet-600 text-white font-semibold"
                     : "text-slate-300 hover:bg-slate-800"
-                }`}
+                  }`}
               >
                 <span className="text-base">
                   {item.icon}

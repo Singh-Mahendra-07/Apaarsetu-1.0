@@ -1,26 +1,20 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
-  Bell,
-  ChevronDown,
   Download,
   Loader2,
   RefreshCw,
-  ShieldCheck,
   AlertCircle,
   CheckCircle2,
-  AlertTriangle,
-  FileSpreadsheet,
   ArrowLeft,
-  Pencil,
   Check,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { batchApi, apiClient } from "@/lib/api";
-import { BatchResponseDTO, BatchDetailDTO, BatchErrorDTO } from "@/types/api";
+import { BatchResponseDTO, BatchErrorDTO } from "@/types/api";
 import InstitutionOperatorProfileDropdown from "@/components/layout/InstitutionOperatorProfileDropdown";
 
 const SEAT_CATEGORIES = ["REGULAR_GENERAL", "REGULAR_RESERVED", "TFW", "EWS", "NRI"];
@@ -46,10 +40,10 @@ function ago(iso?: string) {
   return m < 1
     ? "just now"
     : m < 60
-    ? `${m}m ago`
-    : m < 1440
-    ? `${Math.round(m / 60)}h ago`
-    : `${Math.round(m / 1440)}d ago`;
+      ? `${m}m ago`
+      : m < 1440
+        ? `${Math.round(m / 60)}h ago`
+        : `${Math.round(m / 1440)}d ago`;
 }
 
 function validateField(field: string, value: string): string {
@@ -82,18 +76,18 @@ function Card({
     tone === "red"
       ? "border-red-200"
       : tone === "emerald"
-      ? "border-emerald-200"
-      : tone === "amber"
-      ? "border-amber-200"
-      : "border-slate-200/80";
+        ? "border-emerald-200"
+        : tone === "amber"
+          ? "border-amber-200"
+          : "border-slate-200/80";
   const text =
     tone === "red"
       ? "text-red-600"
       : tone === "emerald"
-      ? "text-emerald-600"
-      : tone === "amber"
-      ? "text-amber-600"
-      : "text-slate-900";
+        ? "text-emerald-600"
+        : tone === "amber"
+          ? "text-amber-600"
+          : "text-slate-900";
 
   return (
     <div className={`rounded-2xl border bg-white p-5 shadow-xs ${border}`}>
@@ -108,8 +102,6 @@ const inputClass =
   "w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 transition focus:border-indigo-600 focus:outline-hidden focus:ring-2 focus:ring-indigo-600/20";
 const btnPrimary =
   "inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98]";
-const btnOutline =
-  "inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-xs transition hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50";
 
 /* ============ INNER VALIDATION DESK ============ */
 function ValidationDesk() {
@@ -120,10 +112,8 @@ function ValidationDesk() {
 
   const [batches, setBatches] = useState<BatchResponseDTO[]>([]);
   const [selectedBatchId, setSelectedBatchId] = useState<string>(paramId || "");
-  const [selectedBatch, setSelectedBatch] = useState<BatchDetailDTO | null>(null);
   const [rows, setRows] = useState<ErrRow[]>([]);
   const [vals, setVals] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
   const [loadingRows, setLoadingRows] = useState(false);
   const [busy, setBusy] = useState(false);
   const [actionErr, setActionErr] = useState("");
@@ -143,7 +133,6 @@ function ValidationDesk() {
 
   // Load batches list
   const loadBatches = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await batchApi.getBatches({ page: 0, size: 50 });
       const batchList = res.content || [];
@@ -156,8 +145,6 @@ function ValidationDesk() {
       }
     } catch {
       showToast("Failed to load batch list from server.", false);
-    } finally {
-      setLoading(false);
     }
   }, [selectedBatchId, showToast]);
 
@@ -173,34 +160,24 @@ function ValidationDesk() {
       setLoadingRows(true);
       setActionErr("");
       try {
-        const [detailRes, errorsRes] = await Promise.allSettled([
-          batchApi.getBatchById(batchId),
-          batchApi.getBatchErrors(batchId),
-        ]);
+        const errors = await batchApi.getBatchErrors(batchId);
+        const errList: BatchErrorDTO[] = errors || [];
+        const errRows: ErrRow[] = errList.map((err) => ({
+          row: err.rowNumber || 1,
+          studentName: err.studentName || "Candidate",
+          field: err.fieldName || "seat_category",
+          currentValue: err.invalidValue || "",
+          ruleCode: err.ruleCode || "VALIDATION_ERROR",
+          description: err.errorMessage || "Discrepancy detected.",
+          suggestedValue: err.suggestedValue,
+        }));
 
-        if (detailRes.status === "fulfilled") {
-          setSelectedBatch(detailRes.value);
-        }
-
-        if (errorsRes.status === "fulfilled") {
-          const errList: BatchErrorDTO[] = errorsRes.value || [];
-          const errRows: ErrRow[] = errList.map((err) => ({
-            row: err.rowNumber || 1,
-            studentName: err.studentName || "Candidate",
-            field: err.fieldName || "seat_category",
-            currentValue: err.invalidValue || "",
-            ruleCode: err.ruleCode || "VALIDATION_ERROR",
-            description: err.errorMessage || "Discrepancy detected.",
-            suggestedValue: err.suggestedValue,
-          }));
-
-          setRows(errRows);
-          const initialVals: Record<string, string> = {};
-          errRows.forEach((r) => {
-            initialVals[key(r)] = r.suggestedValue || r.currentValue;
-          });
-          setVals(initialVals);
-        }
+        setRows(errRows);
+        const initialVals: Record<string, string> = {};
+        errRows.forEach((r) => {
+          initialVals[key(r)] = r.suggestedValue || r.currentValue;
+        });
+        setVals(initialVals);
       } catch {
         setActionErr("Could not retrieve batch validation error breakdown.");
       } finally {
@@ -290,11 +267,10 @@ function ValidationDesk() {
         <div
           role="status"
           aria-live="polite"
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-xl ring-1 transition animate-in fade-in slide-in-from-bottom-4 ${
-            toast.ok
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-sm font-semibold shadow-xl ring-1 transition animate-in fade-in slide-in-from-bottom-4 ${toast.ok
               ? "bg-slate-900 text-white ring-slate-800"
               : "bg-red-600 text-white ring-red-700"
-          }`}
+            }`}
         >
           {toast.ok ? (
             <CheckCircle2 className="h-5 w-5 text-emerald-400" />

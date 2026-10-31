@@ -12,15 +12,11 @@ import {
   ShieldCheck,
   Building2,
   Users,
-  FileSpreadsheet,
   Activity,
   ArrowRight,
   ChevronDown,
   ChevronUp,
-  FileText,
-  Key,
   Search,
-  Filter,
 } from "lucide-react";
 import { apiClient } from "@/lib/api/api-client";
 
@@ -529,8 +525,8 @@ export default function ApiStatusPage() {
         err instanceof Error
           ? err.message
           : typeof err === "object" && err !== null && "message" in err
-          ? String((err as { message: unknown }).message)
-          : "Unknown error occurred";
+            ? String((err as { message: unknown }).message)
+            : "Unknown error occurred";
       const status =
         typeof err === "object" && err !== null && "status" in err
           ? Number((err as { status: unknown }).status)
@@ -655,12 +651,12 @@ export default function ApiStatusPage() {
     // 2. Authentication & Sessions
     // ==========================================
     // Re-use authenticated tokens from active browser session (APAAR-SEC-011)
-    let adminToken: string | null = apiClient.getAccessToken();
-    let adminRefreshToken: string | null = apiClient.getRefreshToken();
-    let officerToken: string | null = adminToken;
-    let instAdminToken: string | null = adminToken;
-    let instOpToken: string | null = adminToken;
-    let verifierToken: string | null = adminToken;
+    const adminToken: string | null = apiClient.getAccessToken();
+    const adminRefreshToken: string | null = apiClient.getRefreshToken();
+    const officerToken: string | null = adminToken;
+    const instAdminToken: string | null = adminToken;
+    const instOpToken: string | null = adminToken;
+    const verifierToken: string | null = adminToken;
 
     await executeApiCall("auth-admin-login", async () => {
       if (adminToken) {
@@ -1501,31 +1497,28 @@ export default function ApiStatusPage() {
             <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 text-xs">
               <button
                 onClick={() => setFilter("ALL")}
-                className={`rounded-lg px-3 py-1.5 font-medium transition ${
-                  filter === "ALL"
+                className={`rounded-lg px-3 py-1.5 font-medium transition ${filter === "ALL"
                     ? "bg-slate-900 text-white"
                     : "text-slate-600 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 All ({totalTests})
               </button>
               <button
                 onClick={() => setFilter("SUCCESS")}
-                className={`rounded-lg px-3 py-1.5 font-medium transition ${
-                  filter === "SUCCESS"
+                className={`rounded-lg px-3 py-1.5 font-medium transition ${filter === "SUCCESS"
                     ? "bg-emerald-600 text-white"
                     : "text-emerald-700 hover:bg-emerald-50"
-                }`}
+                  }`}
               >
                 Passed ({successCount})
               </button>
               <button
                 onClick={() => setFilter("FAILURE")}
-                className={`rounded-lg px-3 py-1.5 font-medium transition ${
-                  filter === "FAILURE"
+                className={`rounded-lg px-3 py-1.5 font-medium transition ${filter === "FAILURE"
                     ? "bg-rose-600 text-white"
                     : "text-rose-700 hover:bg-rose-50"
-                }`}
+                  }`}
               >
                 Failed ({failureCount})
               </button>
@@ -1536,11 +1529,10 @@ export default function ApiStatusPage() {
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
             <button
               onClick={() => setCategoryFilter("ALL")}
-              className={`rounded-lg px-3 py-1 font-semibold transition shrink-0 ${
-                categoryFilter === "ALL"
+              className={`rounded-lg px-3 py-1 font-semibold transition shrink-0 ${categoryFilter === "ALL"
                   ? "bg-indigo-600 text-white"
                   : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-              }`}
+                }`}
             >
               All Subsystems ({totalTests})
             </button>
@@ -1550,11 +1542,10 @@ export default function ApiStatusPage() {
                 <button
                   key={cat}
                   onClick={() => setCategoryFilter(cat)}
-                  className={`rounded-lg px-3 py-1 font-semibold transition shrink-0 ${
-                    categoryFilter === cat
+                  className={`rounded-lg px-3 py-1 font-semibold transition shrink-0 ${categoryFilter === cat
                       ? "bg-indigo-600 text-white"
                       : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   {cat} ({count})
                 </button>
@@ -1598,15 +1589,14 @@ export default function ApiStatusPage() {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <span
-                          className={`rounded-md px-2 py-0.5 font-mono text-[11px] font-bold ${
-                            test.method === "GET"
+                          className={`rounded-md px-2 py-0.5 font-mono text-[11px] font-bold ${test.method === "GET"
                               ? "bg-sky-50 text-sky-700"
                               : test.method === "POST"
-                              ? "bg-emerald-50 text-emerald-700"
-                              : test.method === "PUT"
-                              ? "bg-amber-50 text-amber-700"
-                              : "bg-rose-50 text-rose-700"
-                          }`}
+                                ? "bg-emerald-50 text-emerald-700"
+                                : test.method === "PUT"
+                                  ? "bg-amber-50 text-amber-700"
+                                  : "bg-rose-50 text-rose-700"
+                            }`}
                         >
                           {test.method}
                         </span>
@@ -1632,11 +1622,10 @@ export default function ApiStatusPage() {
 
                     {test.statusCode && (
                       <span
-                        className={`rounded-md px-2 py-0.5 text-xs font-mono font-bold ${
-                          test.statusCode >= 200 && test.statusCode < 300
+                        className={`rounded-md px-2 py-0.5 text-xs font-mono font-bold ${test.statusCode >= 200 && test.statusCode < 300
                             ? "bg-emerald-50 text-emerald-700"
                             : "bg-rose-50 text-rose-700"
-                        }`}
+                          }`}
                       >
                         {test.statusCode} OK
                       </span>

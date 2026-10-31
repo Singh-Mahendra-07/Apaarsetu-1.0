@@ -1,11 +1,18 @@
-import React from 'react'
+"use client";
 
-function page() {
+import { AlertTriangle } from "lucide-react";
+import SubsystemPlaceholder from "@/components/layout/SubsystemPlaceholder";
+
+export default function VerifierExceptionsPage() {
   return (
-    <div>
-      exception
-    </div>
-  )
+    <SubsystemPlaceholder
+      portalTitle="AuthDesk Verifier"
+      portalDashboardHref="/authorized-verifier"
+      subsystemTitle="Verification Discrepancies & Dispute Filing Desk"
+      description="File and track formal academic discrepancies, forged certificate reports, and identity mismatches to AICTE regional nodal officers with evidence attachment."
+      icon={AlertTriangle}
+      backendEndpoint="POST /api/v1/verify/disputes"
+      plannedRelease="Fraud Detection & Dispute Subsystem"
+    />
+  );
 }
-
-export default page

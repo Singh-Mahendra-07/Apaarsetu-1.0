@@ -7,8 +7,18 @@ import com.apaarsetu.common.exception.ResourceNotFoundException;
 import com.apaarsetu.domain.Flag;
 import com.apaarsetu.domain.Institution;
 import com.apaarsetu.domain.Student;
-import com.apaarsetu.domain.enums.*;
-import com.apaarsetu.dto.*;
+import com.apaarsetu.domain.enums.AdmissionMode;
+import com.apaarsetu.domain.enums.AdmissionStatus;
+import com.apaarsetu.domain.enums.Gender;
+import com.apaarsetu.domain.enums.Nationality;
+import com.apaarsetu.domain.enums.ReservationCategory;
+import com.apaarsetu.domain.enums.ValidationStatus;
+import com.apaarsetu.dto.CreateStudentDTO;
+import com.apaarsetu.dto.FlagDetailDTO;
+import com.apaarsetu.dto.StudentDetailDTO;
+import com.apaarsetu.dto.StudentListDTO;
+import com.apaarsetu.dto.StudentResponseDTO;
+import com.apaarsetu.dto.UpdateStudentDTO;
 import com.apaarsetu.repository.FlagRepository;
 import com.apaarsetu.repository.InstitutionRepository;
 import com.apaarsetu.repository.StudentRepository;
@@ -26,8 +36,11 @@ import org.springframework.data.mongodb.gridfs.GridFsResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * ============================================================================
@@ -62,10 +75,9 @@ public class StudentService {
     private final MongoTemplate mongoTemplate;
 
     public StudentResponseDTO createStudent(CreateStudentDTO dto, UserPrincipal principal, String clientIp, String userAgent) {
-        String institutionId = dto.getProgramCode() != null ? principal.getInstitutionId() : null;
-        if (principal.getInstitutionId() != null && !principal.getInstitutionId().isBlank()) {
-            institutionId = principal.getInstitutionId();
-        }
+        String institutionId = (principal != null && principal.getInstitutionId() != null && !principal.getInstitutionId().isBlank())
+                ? principal.getInstitutionId().trim()
+                : null;
 
         if (institutionId == null || institutionId.isBlank()) {
             throw new BadRequestException("Institution ID is required for student enrollment");

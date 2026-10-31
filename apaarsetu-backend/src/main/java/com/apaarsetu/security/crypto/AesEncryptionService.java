@@ -48,8 +48,32 @@ public class AesEncryptionService {
 
     private static final String ENCRYPTION_PREFIX = "enc:v1:";
 
+    public static final String DEFAULT_INSECURE_AES_KEY = "ApaarSetuMasterAesKey2026Secure!";
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private org.springframework.core.env.Environment env;
+
     @PostConstruct
     public void init() {
+        if (configuredKey == null || configuredKey.isBlank()) {
+            throw new IllegalStateException("CRITICAL SECURITY ERROR: 'app.security.aes-key' must not be blank.");
+        }
+        if (DEFAULT_INSECURE_AES_KEY.equals(configuredKey)) {
+            boolean isProd = false;
+            if (env != null) {
+                for (String profile : env.getActiveProfiles()) {
+                    if ("prod".equalsIgnoreCase(profile) || "production".equalsIgnoreCase(profile)) {
+                        isProd = true;
+                        break;
+                    }
+                }
+            }
+            if (isProd) {
+                throw new IllegalStateException("CRITICAL SECURITY VIOLATION: Production application cannot run with default insecure AES key. Define AES_KEY in environment.");
+            }
+            log.warn("SECURITY WARNING: Using default insecure AES key. This is prohibited in production!");
+        }
+
         byte[] keyBytes;
         try {
             // Check if key is Base64 encoded

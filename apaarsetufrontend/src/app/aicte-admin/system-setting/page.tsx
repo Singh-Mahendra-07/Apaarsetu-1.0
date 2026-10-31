@@ -31,7 +31,7 @@ type Notice = { ok: boolean; text: string } | null;
 const getInitialProfile = (): Profile => {
   if (typeof window !== "undefined") {
     try {
-      const u = localStorage.getItem("apaarsetu_user");
+      const u = localStorage.getItem("apaarsetu_user_profile") || localStorage.getItem("apaarsetu_user");
       if (u) {
         const parsed = JSON.parse(u);
         return {
@@ -141,7 +141,7 @@ export default function ProfileSettingsPage() {
             }`}
           >
             <span className={`h-2 w-2 rounded-full ${apiUp ? "bg-emerald-500" : "bg-red-500"}`} />
-            {apiUp ? "API Connected (Port 8081)" : "API Unreachable (Port 8081)"}
+            {apiUp ? "National Gateway Operational" : "National Gateway Offline"}
           </span>
           <button
             aria-label="Notifications"

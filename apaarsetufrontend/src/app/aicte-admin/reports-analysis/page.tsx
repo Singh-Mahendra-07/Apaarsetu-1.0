@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Bell, Download, FileBarChart2, Loader2 } from "lucide-react";
+import { apiClient } from "@/lib/api";
 
 /* ------------------------------ Report config ------------------------------ */
 // Change `endpoint` to match your Spring Boot report routes.
@@ -64,9 +65,8 @@ export default function ReportsPage() {
   const download = async (report: Report) => {
     setDownloading(report.key);
     try {
-      const res = await fetch(report.endpoint, { headers: { Accept: "text/csv" } });
-      if (!res.ok) throw new Error(`Server returned ${res.status}`);
-      const blob = await res.blob();
+      const cleanEndpoint = report.endpoint.replace(/^\/api\/v1/, "");
+      const blob = await apiClient.downloadBlob(cleanEndpoint);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -75,12 +75,12 @@ export default function ReportsPage() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      setMessage({ text: `${report.title} downloaded.`, error: false });
+      setMessage({ text: `${report.title} downloaded successfully.`, error: false });
     } catch (err) {
       setMessage({
         text: `Could not download ${report.title}. ${
           err instanceof Error ? err.message : ""
-        } Check that the API is running and try again.`,
+        } Check that the national registry gateway is running and try again.`,
         error: true,
       });
     } finally {
@@ -108,7 +108,7 @@ export default function ReportsPage() {
             }`}
           >
             <span className={`h-2 w-2 rounded-full ${apiUp ? "bg-emerald-500" : "bg-red-500"}`} />
-            {apiUp ? "API Connected (Port 8081)" : "API Unreachable (Port 8081)"}
+            {apiUp ? "National Gateway Operational" : "National Gateway Offline"}
           </span>
           <button
             aria-label="Notifications"

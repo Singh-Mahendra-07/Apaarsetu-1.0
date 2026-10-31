@@ -29,11 +29,11 @@ public enum FlagResolution {
 
     @JsonCreator
     public static FlagResolution fromString(String val) {
-        if (val == null) return null;
+        if (val == null || val.isBlank()) return null;
         try {
             return FlagResolution.valueOf(val.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
-            return DISMISS_FLAG;
+            throw new IllegalArgumentException("Unknown or unsupported flag resolution: " + val);
         }
     }
 

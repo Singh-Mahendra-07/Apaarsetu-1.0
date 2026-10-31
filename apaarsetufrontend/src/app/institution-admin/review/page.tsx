@@ -1,18 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   Bell,
-  ChevronDown,
   ExternalLink,
   Loader2,
-  LogOut,
   RefreshCw,
   Search,
-  Settings,
   ShieldCheck,
   X,
 } from "lucide-react";
@@ -134,8 +129,7 @@ const btnPrimary =
 
 /* ============ PAGE COMPONENT ============ */
 export default function ReviewApprovalsPage() {
-  const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
@@ -252,7 +246,7 @@ export default function ReviewApprovalsPage() {
     } finally {
       setLoading(false);
     }
-  }, [user?.institutionId]);
+  }, [user]);
 
   useEffect(() => {
     load();
@@ -370,7 +364,7 @@ export default function ReviewApprovalsPage() {
               }`}
           >
             <span className={`h-2 w-2 rounded-full ${apiOk ? "bg-emerald-500" : "bg-red-500"}`} />
-            {apiOk ? "API Connected (Port 8081)" : "API Unreachable (Port 8081)"}
+            {apiOk ? "National Gateway Operational" : "National Gateway Offline"}
           </span>
           <span className="hidden text-xs font-medium text-slate-600 md:inline">
             [{institutionLabel}]
@@ -459,8 +453,8 @@ export default function ReviewApprovalsPage() {
                 aria-selected={tab === k}
                 onClick={() => setTab(k)}
                 className={`-mb-px border-b-2 px-3 py-2 text-sm font-semibold ${tab === k
-                    ? "border-indigo-600 text-indigo-700"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
+                  ? "border-indigo-600 text-indigo-700"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
                   }`}
               >
                 {l}

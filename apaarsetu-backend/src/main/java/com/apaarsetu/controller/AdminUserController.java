@@ -1,12 +1,16 @@
 package com.apaarsetu.controller;
 
 import com.apaarsetu.common.dto.ApiResponse;
+import com.apaarsetu.common.exception.ResourceNotFoundException;
 import com.apaarsetu.domain.SystemSetting;
 import com.apaarsetu.domain.User;
 import com.apaarsetu.domain.UserPreference;
 import com.apaarsetu.domain.enums.RegionZone;
 import com.apaarsetu.domain.enums.UserRole;
 import com.apaarsetu.domain.enums.UserStatus;
+import com.apaarsetu.dto.CreateUserRequest;
+import com.apaarsetu.dto.UpdateSystemSettingRequest;
+import com.apaarsetu.dto.UpdateUserPreferenceRequest;
 import com.apaarsetu.dto.UserProfileDTO;
 import com.apaarsetu.repository.SystemSettingRepository;
 import com.apaarsetu.repository.UserPreferenceRepository;
@@ -16,6 +20,7 @@ import com.apaarsetu.service.AuditService;
 import com.apaarsetu.service.GridFsStorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -23,9 +28,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.nio.charset.StandardCharsets;
@@ -65,7 +76,7 @@ public class AdminUserController {
     @PostMapping(value = "/admin/users", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('AICTE_ADMIN')")
     public ResponseEntity<ApiResponse<UserProfileDTO>> registerUserJson(
-            @jakarta.validation.Valid @RequestBody com.apaarsetu.dto.CreateUserRequest requestDTO,
+            @Valid @RequestBody CreateUserRequest requestDTO,
             @AuthenticationPrincipal UserPrincipal principal,
             HttpServletRequest request) {
         return handleRegistration(requestDTO, null, principal, request);
@@ -92,24 +103,25 @@ public class AdminUserController {
                 userJson = multipartRequest.getParameter("user");
             }
 
-            com.apaarsetu.dto.CreateUserRequest requestDTO;
+            CreateUserRequest requestDTO;
             if (userJson != null && !userJson.isBlank()) {
-                requestDTO = objectMapper.readValue(userJson, com.apaarsetu.dto.CreateUserRequest.class);
+                requestDTO = objectMapper.readValue(userJson, CreateUserRequest.class);
             } else {
                 throw new IllegalArgumentException("User registration payload is required in part 'user'");
             }
 
             return handleRegistration(requestDTO, appointmentOrder, principal, request);
-        } catch (IllegalArgumentException e) {
-            throw e;
         } catch (Exception e) {
+            if (e instanceof IllegalArgumentException iae) {
+                throw iae;
+            }
             log.error("Failed to parse multipart user registration", e);
             throw new RuntimeException("Could not process user registration: " + e.getMessage(), e);
         }
     }
 
     private ResponseEntity<ApiResponse<UserProfileDTO>> handleRegistration(
-            com.apaarsetu.dto.CreateUserRequest dto,
+            CreateUserRequest dto,
             MultipartFile appointmentOrder,
             UserPrincipal principal,
             HttpServletRequest request) {
@@ -188,7 +200,7 @@ public class AdminUserController {
                     .region(zone)
                     .phone(phone)
                     .status(UserStatus.ACTIVE)
-                    .mfaEnabled(false)
+                    .mfaEnabled(mfaRequired)
                     .requiresPasswordChange(true)
                     .mustChangePassword(true)
                     .createdAt(Instant.now())
@@ -217,9 +229,10 @@ public class AdminUserController {
                     .build();
 
             return ResponseEntity.ok(ApiResponse.success(userProfileDTO));
-        } catch (IllegalArgumentException e) {
-            throw e;
         } catch (Exception e) {
+            if (e instanceof IllegalArgumentException iae) {
+                throw iae;
+            }
             log.error("Failed to register user", e);
             throw new RuntimeException("Could not register user: " + e.getMessage(), e);
         }
@@ -236,7 +249,7 @@ public class AdminUserController {
     @PutMapping("/admin/settings")
     @PreAuthorize("hasRole('AICTE_ADMIN')")
     public ResponseEntity<ApiResponse<SystemSetting>> updateSettings(
-            @jakarta.validation.Valid @RequestBody com.apaarsetu.dto.UpdateSystemSettingRequest updateDTO,
+            @Valid @RequestBody UpdateSystemSettingRequest updateDTO,
             @AuthenticationPrincipal UserPrincipal principal,
             HttpServletRequest request) {
         SystemSetting setting = systemSettingRepository.findById("GLOBAL")
@@ -283,7 +296,7 @@ public class AdminUserController {
 
     @PutMapping("/users/preferences")
     public ResponseEntity<ApiResponse<UserPreference>> updateUserPreferences(
-            @jakarta.validation.Valid @RequestBody com.apaarsetu.dto.UpdateUserPreferenceRequest updateDTO,
+            @Valid @RequestBody UpdateUserPreferenceRequest updateDTO,
             @AuthenticationPrincipal UserPrincipal principal) {
         String userId = principal != null ? principal.getId() : "default";
         UserPreference pref = userPreferenceRepository.findByUserId(userId)
@@ -307,7 +320,11 @@ public class AdminUserController {
             @AuthenticationPrincipal UserPrincipal principal,
             HttpServletRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new com.apaarsetu.common.exception.ResourceNotFoundException("User not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
+
+        if (body == null || !body.containsKey("password")) {
+            throw new IllegalArgumentException("Password is required in request body");
+        }
 
         String newPassword = body.get("password");
         if (newPassword == null || newPassword.length() < 8) {
@@ -341,7 +358,11 @@ public class AdminUserController {
         User user = userRepository.findById(id)
                 .orElseGet(() -> userRepository.findByEmail(id).orElse(null));
         if (user == null) {
-            throw new com.apaarsetu.common.exception.ResourceNotFoundException("User not found with ID or Email: " + id);
+            throw new ResourceNotFoundException("User not found with ID or Email: " + id);
+        }
+
+        if (body == null) {
+            throw new IllegalArgumentException("Request body is required");
         }
 
         String statusStr = body.containsKey("status") ? body.get("status") : body.get("duty");

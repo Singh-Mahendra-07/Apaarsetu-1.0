@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   Ban,
@@ -15,16 +13,11 @@ import {
   FileText,
   Info,
   Loader2,
-  LogOut,
-  Mail,
   RefreshCw,
   Scale,
-  Settings,
   ShieldCheck,
-  UserRound,
   X,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
 import OfficerProfileDropdown from "@/components/layout/OfficerProfileDropdown";
 
 /* -------------------------------- Types -------------------------------- */
@@ -90,79 +83,7 @@ type FlagDetail = {
 
 /* ------------------------------ Sample data ------------------------------ */
 
-const SAMPLE_FLAGS: Flag[] = [
-  {
-    id: "#FLG-101",
-    type: "DUAL_ENROLLMENT",
-    apaarId: "9845-1234-5678",
-    candidateName: "Aarav Sharma",
-    primaryCollege: "Delhi Inst of Tech",
-    conflictingCollege: "Bengaluru Business",
-    evidence: {
-      name: "Transfer_Certificate_No_4402.pdf",
-      url: "/api/v1/evidence/Transfer_Certificate_No_4402.pdf",
-    },
-    severity: "CRIT",
-    status: "PENDING",
-  },
-  {
-    id: "#FLG-102",
-    type: "CAPACITY_EXCEEDED",
-    apaarId: "9811-9012-3456",
-    primaryCollege: "Mumbai Tech Univ",
-    conflictingCollege: null,
-    evidence: null,
-    severity: "HIGH",
-    status: "PENDING",
-  },
-  {
-    id: "#FLG-103",
-    type: "INVALID_MIGRATION",
-    apaarId: "9870-4567-8901",
-    primaryCollege: "Punjab Engg Coll",
-    conflictingCollege: "Chandigarh Tech",
-    evidence: {
-      name: "Migration_NOC.pdf",
-      url: "/api/v1/evidence/Migration_NOC.pdf",
-    },
-    severity: "MED",
-    status: "PENDING",
-  },
-];
 
-const SAMPLE_RADAR: CapacityRow[] = [
-  {
-    institution: "DITM Delhi",
-    program: "B.Tech",
-    intake: 120,
-    current: 135,
-  },
-  {
-    institution: "BPBA Bengaluru",
-    program: "MBA-PG",
-    intake: 60,
-    current: 64,
-  },
-  {
-    institution: "BPBA Bengaluru",
-    program: "MBA-PG",
-    intake: 60,
-    current: 64,
-  },
-  {
-    institution: "BPBA Bengaluru",
-    program: "MBA-PG",
-    intake: 60,
-    current: 64,
-  },
-];
-
-const SAMPLE_SUMMARY: Summary = {
-  unresolvedFlags: 12,
-  regionalColleges: 342,
-  cleanValidated: 4210,
-  totalRecords: 4468,
-};
 
 const SAMPLE_DETAILS: Record<string, FlagDetail> = {
   "FLG-101": {
@@ -401,14 +322,6 @@ const EMPTY_OFFICER_SUMMARY: Summary = {
 };
 
 export default function OfficerConsolePage() {
-  const router = useRouter();
-  const { user, logout } = useAuth();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const [flags, setFlags] = useState<Flag[]>([]);
   const [radar, setRadar] = useState<CapacityRow[]>([]);
   const [summary, setSummary] = useState<Summary>(EMPTY_OFFICER_SUMMARY);
@@ -422,7 +335,6 @@ export default function OfficerConsolePage() {
   );
 
   const [adjudicating, setAdjudicating] = useState<Flag | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [resolvedCount, setResolvedCount] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -531,10 +443,7 @@ export default function OfficerConsolePage() {
   };
 
   return (
-    <div
-      className="min-h-screen bg-slate-50 text-slate-900"
-      onClick={() => setMenuOpen(false)}
-    >
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* Top bar */}
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-4 sm:px-8">
         <div className="flex items-center gap-3">
@@ -552,8 +461,8 @@ export default function OfficerConsolePage() {
         <div className="flex items-center gap-3">
           <span
             className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${apiUp
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-red-200 bg-red-50 text-red-700"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-red-200 bg-red-50 text-red-700"
               }`}
           >
             <span
@@ -561,8 +470,8 @@ export default function OfficerConsolePage() {
                 }`}
             />
             {apiUp
-              ? "API Connected (Port 8081)"
-              : "API Unreachable (Port 8081)"}
+              ? "National Gateway Operational"
+              : "National Gateway Offline"}
           </span>
 
           <OfficerProfileDropdown />
@@ -597,8 +506,8 @@ export default function OfficerConsolePage() {
             ) : (
               <span
                 className={`rounded-md px-2 py-0.5 text-sm font-bold ${hasCritical
-                    ? "bg-red-100 text-red-700"
-                    : "bg-amber-100 text-amber-800"
+                  ? "bg-red-100 text-red-700"
+                  : "bg-amber-100 text-amber-800"
                   }`}
               >
                 {hasCritical ? "CRITICAL" : "PENDING"}
@@ -764,8 +673,8 @@ export default function OfficerConsolePage() {
                       ) : (
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-semibold ${f.status === "RESOLVED"
-                              ? "bg-emerald-50 text-emerald-800"
-                              : "bg-amber-50 text-amber-800"
+                            ? "bg-emerald-50 text-emerald-800"
+                            : "bg-amber-50 text-amber-800"
                             }`}
                         >
                           {f.status === "HEARING"
@@ -1206,8 +1115,8 @@ function AdjudicateModal({
                         target="_blank"
                         rel="noreferrer"
                         className={`inline-flex items-center gap-1 hover:underline ${ev.rejection
-                            ? "text-red-700"
-                            : "text-indigo-700"
+                          ? "text-red-700"
+                          : "text-indigo-700"
                           }`}
                       >
                         {ev.rejection ? (
@@ -1316,8 +1225,8 @@ function AdjudicateModal({
                     <label
                       key={d.value}
                       className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-3 ${decision === d.value
-                          ? "border-indigo-500 bg-indigo-50"
-                          : "border-transparent hover:bg-slate-50"
+                        ? "border-indigo-500 bg-indigo-50"
+                        : "border-transparent hover:bg-slate-50"
                         }`}
                     >
                       <input

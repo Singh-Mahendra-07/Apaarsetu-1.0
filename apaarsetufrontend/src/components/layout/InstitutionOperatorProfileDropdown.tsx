@@ -48,7 +48,7 @@ export default function InstitutionOperatorProfileDropdown() {
     try {
       await logout();
     } finally {
-      router.push("/officials-login");
+      router.push("/login");
     }
   };
 

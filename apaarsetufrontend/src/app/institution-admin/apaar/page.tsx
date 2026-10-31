@@ -1,22 +1,22 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
-  AlertTriangle,
+  AlertCircle,
   ArrowLeft,
   CheckCircle2,
   Download,
   Loader2,
   RefreshCw,
-  Search,
   ShieldCheck,
   X,
 } from "lucide-react";
-import InstitutionAdminSidebar from "@/components/layout/institutionAdminSidebar";
 import { batchApi, dashboardApi } from "@/lib/api";
-import { BatchResponseDTO, BatchDetailDTO, BatchErrorDTO } from "@/types/api";
+import { useAuth } from "@/lib/auth-context";
+import { BatchResponseDTO, BatchErrorDTO } from "@/types/api";
+import InstitutionAdminProfileDropdown from "@/components/layout/InstitutionAdminProfileDropdown";
 
 function ValidationDesk() {
   const searchParams = useSearchParams();
@@ -24,7 +24,6 @@ function ValidationDesk() {
 
   const [batches, setBatches] = useState<BatchResponseDTO[]>([]);
   const [selectedBatchId, setSelectedBatchId] = useState<string>(paramId ?? "");
-  const [detail, setDetail] = useState<BatchDetailDTO | null>(null);
   const [errors, setErrors] = useState<BatchErrorDTO[]>([]);
   const [corrections, setCorrections] = useState<Record<string, string>>({});
   const [loadingBatches, setLoadingBatches] = useState(true);
@@ -33,30 +32,42 @@ function ValidationDesk() {
   const [actionErr, setActionErr] = useState("");
   const [toast, setToast] = useState<{ ok: boolean; text: string } | null>(null);
 
+  const { user } = useAuth();
   const [institutionName, setInstitutionName] = useState(() => {
     if (typeof window !== "undefined") {
       try {
-        const u = localStorage.getItem("apaarsetu_user");
+        const u = localStorage.getItem("apaarsetu_user_profile") || localStorage.getItem("apaarsetu_user");
         if (u) {
           const parsed = JSON.parse(u);
-          return parsed.institutionName || "";
+          return parsed.institutionName || parsed.fullName || "";
         }
-      } catch {}
+      } catch { }
     }
     return "";
   });
   const [institutionId, setInstitutionId] = useState(() => {
     if (typeof window !== "undefined") {
       try {
-        const u = localStorage.getItem("apaarsetu_user");
+        const u = localStorage.getItem("apaarsetu_user_profile") || localStorage.getItem("apaarsetu_user");
         if (u) {
           const parsed = JSON.parse(u);
           return parsed.institutionId || "";
         }
-      } catch {}
+      } catch { }
     }
     return "";
   });
+
+  useEffect(() => {
+    if (user) {
+      if (user.institutionId && !institutionId) {
+        setInstitutionId(user.institutionId);
+      }
+      if (user.fullName && !institutionName) {
+        setInstitutionName(user.fullName);
+      }
+    }
+  }, [user, institutionId, institutionName]);
 
   const notify = (ok: boolean, text: string) => {
     setToast({ ok, text });
@@ -113,7 +124,6 @@ function ValidationDesk() {
   // Load batch detail and errors whenever selected batch changes
   const loadBatchErrors = useCallback(async (batchId: string) => {
     if (!batchId) {
-      setDetail(null);
       setErrors([]);
       return;
     }
@@ -122,19 +132,12 @@ function ValidationDesk() {
     setActionErr("");
 
     try {
-      const [detailRes, errorsRes] = await Promise.allSettled([
-        batchApi.getBatchById(batchId),
-        batchApi.getBatchErrors(batchId),
-      ]);
-
-      if (detailRes.status === "fulfilled" && detailRes.value) {
-        setDetail(detailRes.value);
-      }
-      if (errorsRes.status === "fulfilled" && errorsRes.value) {
-        setErrors(errorsRes.value);
+      const batchErrors = await batchApi.getBatchErrors(batchId);
+      if (batchErrors) {
+        setErrors(batchErrors);
       }
     } catch (err) {
-      setActionErr(err instanceof Error ? err.message : "Failed to load batch errors.");
+      setActionErr(err instanceof Error ? err.message : "Failed to load validation errors. Please check backend connection and retry.");
     } finally {
       setLoadingDetail(false);
     }
@@ -293,224 +296,238 @@ function ValidationDesk() {
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Back to Bulk Upload
           </Link>
+          <InstitutionAdminProfileDropdown />
         </div>
       </header>
 
       <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-indigo-700">Data Quality & Remediation</p>
-              <h1 className="text-2xl font-black text-slate-900">APAAR Demographic & Format Validation Desk</h1>
-            </div>
-            {selectedBatch && (
-              <span className="rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1 text-xs font-bold text-indigo-700">
-                Batch: {selectedBatch.id} ({selectedBatch.academicYear || "2026-27"})
-              </span>
-            )}
-          </div>
-
-          {actionErr && (
-            <div role="alert" className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
-              <span>{actionErr}</span>
-              <button onClick={() => setActionErr("")} className="text-red-500 hover:text-red-700">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          )}
-
-          {/* Batch Selector & Summary Cards */}
-          <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex flex-wrap items-center gap-3">
-              <label htmlFor="select-batch" className="text-xs font-bold uppercase tracking-wider text-slate-600">
-                Select Batch:
-              </label>
-              <select
-                id="select-batch"
-                value={selectedBatchId}
-                onChange={(e) => setSelectedBatchId(e.target.value)}
-                className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
-              >
-                {batches.map((b) => {
-                  const errorCount =
-                    (b.summary?.invalidFormatCount ?? 0) +
-                    (b.summary?.anomalyFlagCount ?? 0) +
-                    (b.summary?.duplicateCount ?? 0);
-                  return (
-                    <option key={b.id} value={b.id}>
-                      {b.id} — {b.fileName} ({errorCount} errors, {b.summary?.validatedCount ?? 0} valid)
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleDownloadErrorReport}
-                disabled={errors.length === 0}
-                className="inline-flex items-center gap-2 rounded-xl border border-indigo-600 px-4 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-50 disabled:opacity-40"
-              >
-                <Download className="h-3.5 w-3.5" /> Export Error Report (.CSV)
-              </button>
-            </div>
-          </section>
-
-          {/* 4 Summary Cards */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-red-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">1. Row Errors Awaiting Fix</p>
-              <p className="mt-1 text-2xl font-black text-red-600">{errors.length} Errors</p>
-              <p className="mt-0.5 text-xs text-slate-500">In batch {selectedBatchId || "—"}</p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">2. Validated Records</p>
-              <p className="mt-1 text-2xl font-black text-emerald-600">
-                {selectedBatch?.summary?.validatedCount ?? 0} Clean
-              </p>
-              <p className="mt-0.5 text-xs text-slate-500">Passed demographic validation</p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">3. Primary Error Category</p>
-              <p className="mt-1 text-lg font-black text-slate-900">
-                {errors.length > 0 ? errors[0].ruleCode || "Format Check" : "None (All Clean)"}
-              </p>
-              <p className="mt-0.5 truncate text-xs text-slate-500">
-                {errors.length > 0 ? errors[0].errorMessage : "Ready for approval"}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">4. Modified In This Session</p>
-              <p className="mt-1 text-2xl font-black text-indigo-600">{changedRows.length} Corrected</p>
-              <p className="mt-0.5 text-xs text-slate-500">Ready to revalidate</p>
-            </div>
-          </div>
-
-          {/* Remediation Table */}
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-6 py-4">
-              <div>
-                <h2 className="text-base font-bold text-slate-900">
-                  Inline Batch Error Remediation Table ({selectedBatchId || "No Batch Selected"})
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Edit the values directly in the input boxes below, then click &ldquo;Save &amp; Revalidate Batch&rdquo;.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleRevalidate}
-                disabled={submitting || changedRows.length === 0}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Re-validating...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="h-4 w-4" />
-                    Save &amp; Revalidate ({changedRows.length} edits)
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="overflow-x-auto">
-              {loadingDetail ? (
-                <div className="flex items-center justify-center gap-2 py-20 text-slate-500">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Loading validation errors from database...
-                </div>
-              ) : errors.length === 0 ? (
-                <div className="py-16 text-center text-sm font-semibold text-slate-500">
-                  🎉 No demographic or validation errors found for this batch. All student records are valid!
-                </div>
-              ) : (
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
-                    <tr>
-                      <th className="px-5 py-3">Row #</th>
-                      <th className="px-5 py-3">Student Name</th>
-                      <th className="px-5 py-3">Field with Error</th>
-                      <th className="px-5 py-3">Current / Invalid Value</th>
-                      <th className="min-w-[200px] px-5 py-3">Correction Input</th>
-                      <th className="px-5 py-3">Rule &amp; Error Explanation</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {errors.map((err) => {
-                      const rowKey = getRowKey(err);
-                      const currentVal = getFieldValue(err);
-                      const isEdited = isRowEdited(err);
-
-                      return (
-                        <tr key={rowKey} className={`transition ${isEdited ? "bg-amber-50/70" : "hover:bg-slate-50/50"}`}>
-                          <td className="whitespace-nowrap px-5 py-4 font-bold text-slate-900">
-                            Row {err.rowNumber}
-                          </td>
-                          <td className="whitespace-nowrap px-5 py-4 font-semibold text-slate-800">
-                            {err.studentName || "—"}
-                            {err.apaarId && (
-                              <span className="block font-mono text-[11px] text-slate-400">
-                                {err.apaarId}
-                              </span>
-                            )}
-                          </td>
-                          <td className="whitespace-nowrap px-5 py-4 font-mono text-xs font-bold text-indigo-700">
-                            {err.fieldName}
-                          </td>
-                          <td className="px-5 py-4 font-mono text-xs text-red-600 line-through">
-                            {err.invalidValue || "⟨empty⟩"}
-                          </td>
-                          <td className="px-5 py-4">
-                            <input
-                              type="text"
-                              value={currentVal}
-                              onChange={(e) => handleValueChange(err, e.target.value)}
-                              placeholder={getPlaceholder(err)}
-                              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
-                            />
-                            {isEdited && (
-                              <span className="mt-0.5 block text-[10px] font-bold text-amber-700">
-                                Modified (Pending Save)
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-5 py-4">
-                            <span className="inline-block rounded bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">
-                              {err.ruleCode}
-                            </span>
-                            <p className="mt-1 text-xs text-slate-600">
-                              {err.errorMessage}
-                            </p>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </section>
-
-        {toast && (
-          <div
-            role="status"
-            aria-live="polite"
-            className={`fixed bottom-6 right-6 z-50 max-w-sm rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-xl ${
-              toast.ok ? "bg-emerald-600" : "bg-red-600"
-            }`}
-          >
-            {toast.text}
-          </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-indigo-700">Data Quality & Remediation</p>
+          <h1 className="text-2xl font-black text-slate-900">APAAR Demographic & Format Validation Desk</h1>
+        </div>
+        {selectedBatch && (
+          <span className="rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1 text-xs font-bold text-indigo-700">
+            Batch: {selectedBatch.id} ({selectedBatch.academicYear || "2026-27"})
+          </span>
         )}
       </div>
-    );
+
+      {actionErr && (
+        <div role="alert" className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+          <span>{actionErr}</span>
+          <button onClick={() => setActionErr("")} className="text-red-500 hover:text-red-700">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Batch Selector & Summary Cards */}
+      <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center gap-3">
+          <label htmlFor="select-batch" className="text-xs font-bold uppercase tracking-wider text-slate-600">
+            Select Batch:
+          </label>
+          <select
+            id="select-batch"
+            value={selectedBatchId}
+            onChange={(e) => setSelectedBatchId(e.target.value)}
+            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
+          >
+            {batches.map((b) => {
+              const errorCount =
+                (b.summary?.invalidFormatCount ?? 0) +
+                (b.summary?.anomalyFlagCount ?? 0) +
+                (b.summary?.duplicateCount ?? 0);
+              return (
+                <option key={b.id} value={b.id}>
+                  {b.id} — {b.fileName} ({errorCount} errors, {b.summary?.validatedCount ?? 0} valid)
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleDownloadErrorReport}
+            disabled={errors.length === 0}
+            className="inline-flex items-center gap-2 rounded-xl border border-indigo-600 px-4 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-50 disabled:opacity-40"
+          >
+            <Download className="h-3.5 w-3.5" /> Export Error Report (.CSV)
+          </button>
+        </div>
+      </section>
+
+      {/* 4 Summary Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-2xl border border-red-200 bg-white p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">1. Row Errors Awaiting Fix</p>
+          <p className="mt-1 text-2xl font-black text-red-600">{errors.length} Errors</p>
+          <p className="mt-0.5 text-xs text-slate-500">In batch {selectedBatchId || "—"}</p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">2. Validated Records</p>
+          <p className="mt-1 text-2xl font-black text-emerald-600">
+            {selectedBatch?.summary?.validatedCount ?? 0} Clean
+          </p>
+          <p className="mt-0.5 text-xs text-slate-500">Passed demographic validation</p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">3. Primary Error Category</p>
+          <p className="mt-1 text-lg font-black text-slate-900">
+            {errors.length > 0 ? errors[0].ruleCode || "Format Check" : "None (All Clean)"}
+          </p>
+          <p className="mt-0.5 truncate text-xs text-slate-500">
+            {errors.length > 0 ? errors[0].errorMessage : "Ready for approval"}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">4. Modified In This Session</p>
+          <p className="mt-1 text-2xl font-black text-indigo-600">{changedRows.length} Corrected</p>
+          <p className="mt-0.5 text-xs text-slate-500">Ready to revalidate</p>
+        </div>
+      </div>
+
+      {/* Remediation Table */}
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-6 py-4">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">
+              Inline Batch Error Remediation Table ({selectedBatchId || "No Batch Selected"})
+            </h2>
+            <p className="text-xs text-slate-500">
+              Edit the values directly in the input boxes below, then click &ldquo;Save &amp; Revalidate Batch&rdquo;.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleRevalidate}
+            disabled={submitting || changedRows.length === 0}
+            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Re-validating...
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-4 w-4" />
+                Save &amp; Revalidate ({changedRows.length} edits)
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          {loadingDetail ? (
+            <div className="flex items-center justify-center gap-2 py-20 text-slate-500">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Loading validation errors from database...
+            </div>
+          ) : actionErr ? (
+            <div className="py-16 text-center text-sm font-semibold text-red-600">
+              <AlertCircle className="mx-auto h-8 w-8 text-red-500 mb-2" />
+              {actionErr}
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => selectedBatchId && loadBatchErrors(selectedBatchId)}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-200"
+                >
+                  Retry Loading
+                </button>
+              </div>
+            </div>
+          ) : errors.length === 0 ? (
+            <div className="py-16 text-center text-sm font-semibold text-slate-500">
+              🎉 No demographic or validation errors found for this batch. All student records are valid!
+            </div>
+          ) : (
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
+                <tr>
+                  <th className="px-5 py-3">Row #</th>
+                  <th className="px-5 py-3">Student Name</th>
+                  <th className="px-5 py-3">Field with Error</th>
+                  <th className="px-5 py-3">Current / Invalid Value</th>
+                  <th className="min-w-[200px] px-5 py-3">Correction Input</th>
+                  <th className="px-5 py-3">Rule &amp; Error Explanation</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {errors.map((err) => {
+                  const rowKey = getRowKey(err);
+                  const currentVal = getFieldValue(err);
+                  const isEdited = isRowEdited(err);
+
+                  return (
+                    <tr key={rowKey} className={`transition ${isEdited ? "bg-amber-50/70" : "hover:bg-slate-50/50"}`}>
+                      <td className="whitespace-nowrap px-5 py-4 font-bold text-slate-900">
+                        Row {err.rowNumber}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 font-semibold text-slate-800">
+                        {err.studentName || "—"}
+                        {err.apaarId && (
+                          <span className="block font-mono text-[11px] text-slate-400">
+                            {err.apaarId}
+                          </span>
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 font-mono text-xs font-bold text-indigo-700">
+                        {err.fieldName}
+                      </td>
+                      <td className="px-5 py-4 font-mono text-xs text-red-600 line-through">
+                        {err.invalidValue || "⟨empty⟩"}
+                      </td>
+                      <td className="px-5 py-4">
+                        <input
+                          type="text"
+                          value={currentVal}
+                          onChange={(e) => handleValueChange(err, e.target.value)}
+                          placeholder={getPlaceholder(err)}
+                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                        />
+                        {isEdited && (
+                          <span className="mt-0.5 block text-[10px] font-bold text-amber-700">
+                            Modified (Pending Save)
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="inline-block rounded bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">
+                          {err.ruleCode}
+                        </span>
+                        <p className="mt-1 text-xs text-slate-600">
+                          {err.errorMessage}
+                        </p>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
+
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed bottom-6 right-6 z-50 max-w-sm rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-xl ${toast.ok ? "bg-emerald-600" : "bg-red-600"
+            }`}
+        >
+          {toast.text}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function ApaarValidationPage() {

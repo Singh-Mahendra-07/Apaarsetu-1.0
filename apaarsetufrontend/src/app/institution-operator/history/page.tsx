@@ -1,16 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import {
   History,
   Download,
   Loader2,
   RefreshCw,
-  Search,
-  CheckCircle2,
-  AlertCircle,
-  FileSpreadsheet,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { batchApi, apiClient } from "@/lib/api";

@@ -4,14 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
   PieChart,
-  GraduationCap,
   Loader2,
   RefreshCw,
   AlertTriangle,
-  CheckCircle2,
-  Users,
-  ShieldCheck,
-  Plus,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { dashboardApi, apiClient } from "@/lib/api";
@@ -186,13 +181,12 @@ export default function OperatorIntakeManagementPage() {
                         </span>
                         <div className="mt-1 h-2 w-full rounded-full bg-slate-100 overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              isFull
+                            className={`h-full rounded-full transition-all duration-500 ${isFull
                                 ? "bg-red-500"
                                 : fillPct > 80
-                                ? "bg-amber-500"
-                                : "bg-indigo-600"
-                            }`}
+                                  ? "bg-amber-500"
+                                  : "bg-indigo-600"
+                              }`}
                             style={{ width: `${Math.min(100, fillPct)}%` }}
                           />
                         </div>

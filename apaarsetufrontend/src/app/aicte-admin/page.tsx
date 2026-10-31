@@ -2,6 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
@@ -18,6 +19,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { apiClient, dashboardApi } from "@/lib/api";
 
 /* ----------------------------- Types ----------------------------- */
 
@@ -119,27 +121,40 @@ export default function Page() {
   const load = useCallback(async () => {
     setLoading(true);
 
-    fetch("/api/v1/health", { cache: "no-store" })
-      .then((r) => setApiUp(r.ok))
-      .catch(() => setApiUp(false));
-
     try {
-      const res = await fetch("/api/v1/dashboard/national", {
-        cache: "no-store",
-      });
-
-      if (res.ok) {
-        setData((await res.json()) as NationalDashboardDTO);
-        setApiUp(true);
-      } else if (res.status === 401 || res.status === 403) {
+      const res = await apiClient.get<NationalDashboardDTO>("/dashboard/national");
+      if (res) {
+        setData(res);
         setApiUp(true);
       }
     } catch {
-      // Network connection error
+      try {
+        const healthRes = await fetch("/api/v1/health", { cache: "no-store" });
+        setApiUp(healthRes.ok);
+      } catch {
+        setApiUp(false);
+      }
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const handleExport = async (format: string) => {
+    setExportOpen(false);
+    try {
+      const blob = await dashboardApi.exportReport('ENROLLMENT');
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `national-enrollment-report-${data.academicYear || '2026-27'}.${format.toLowerCase().includes('excel') ? 'csv' : 'csv'}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Export failed", e);
+    }
+  };
 
   useEffect(() => {
     load();
@@ -207,14 +222,14 @@ export default function Page() {
         >
           <span
             className={`h-2.5 w-2.5 rounded-full ${apiUp
-                ? "bg-green-400 shadow-[0_0_8px_#4ade80]"
-                : "bg-red-400"
+              ? "bg-green-400 shadow-[0_0_8px_#4ade80]"
+              : "bg-red-400"
               }`}
           />
 
           {apiUp
-            ? "API Connected (Port 8081)"
-            : "API Unreachable (Port 8081)"}
+            ? "National Gateway Operational"
+            : "National Gateway Offline"}
         </div>
 
         {/* Right: Clickable admin profile */}
@@ -264,9 +279,8 @@ export default function Page() {
             </div>
 
             <ChevronDown
-              className={`h-4 w-4 transition-transform ${
-                profileOpen ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 transition-transform ${profileOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
@@ -403,7 +417,7 @@ export default function Page() {
                       try {
                         await logout();
                       } finally {
-                        router.push("/officials-login");
+                        router.push("/login");
                       }
                     }}
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-red-600 transition hover:bg-red-50"
@@ -475,7 +489,7 @@ export default function Page() {
                       <button
                         type="button"
                         className="w-full px-4 py-2 text-left hover:bg-slate-50"
-                        onClick={() => setExportOpen(false)}
+                        onClick={() => handleExport(format)}
                       >
                         Export as {format}
                       </button>
@@ -660,13 +674,13 @@ export default function Page() {
                             </td>
 
                             <td className="px-4 py-3">
-                              <a
-                                href={`/institutions/${institution.id}`}
+                              <Link
+                                href="/aicte-admin/institution-management"
                                 className="inline-flex items-center gap-1 whitespace-nowrap rounded-md border border-blue-600 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50"
                               >
                                 Inspect College
                                 <ArrowRight className="h-3.5 w-3.5" />
-                              </a>
+                              </Link>
                             </td>
                           </tr>
                         );
@@ -692,9 +706,9 @@ export default function Page() {
               </div>
             ) : data.capacityViolations.length === 0 &&
               data.anomalies.length === 0 ? (
-                <p className="py-6 text-center text-sm text-slate-500">
-                  No violations or anomalies right now.
-                </p>
+              <p className="py-6 text-center text-sm text-slate-500">
+                No violations or anomalies right now.
+              </p>
             ) : (
               <>
                 {data.capacityViolations.map((violation, index) => {

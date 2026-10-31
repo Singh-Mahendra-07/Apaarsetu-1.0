@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
+const backendUrl =
+  process.env.INTERNAL_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "http://localhost:8081/api/v1";
+
+const cleanBackendUrl = backendUrl.replace(/\/+$/, "");
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "standalone",
   turbopack: {
     rules: {
       "*.css": {
@@ -14,7 +21,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/v1/:path*",
-        destination: "http://localhost:8081/api/v1/:path*",
+        destination: `${cleanBackendUrl}/:path*`,
       },
     ];
   },

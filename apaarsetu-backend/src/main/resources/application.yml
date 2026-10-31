@@ -41,9 +41,9 @@ spring:
     properties:
       mail:
         smtp:
-          auth: false
+          auth: ${MAIL_AUTH:false}
           starttls:
-            enable: false
+            enable: ${MAIL_STARTTLS:false}
 
 springdoc:
   api-docs:

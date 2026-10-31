@@ -70,21 +70,7 @@ type Dossier = {
   syncLogs: { at: string; ok: boolean; records: number; message: string }[];
 };
 
-/* ------------------------------ Sample data ------------------------------ */
-// Used only if the API can't be reached.
 
-const SAMPLE_INSTITUTIONS: Institution[] = [
-  { id: "AICTE-INST-1001", name: "Delhi Tech & Management (DTU)", affiliation: "Delhi Tech University", city: "Delhi", zone: "NORTH", category: "ENGINEERING", programs: 8, approvedSeats: 750, enrolled: 720, status: "APPROVED" },
-  { id: "AICTE-INST-1002", name: "Apex College of Engineering", affiliation: "Autonomous", city: "Chandigarh", zone: "NORTH", category: "ENGINEERING", programs: 4, approvedSeats: 300, enrolled: 300, status: "APPROVED" },
-  { id: "AICTE-INST-1003", name: "Northern Institute of Tech", affiliation: "Punjab Tech Univ", city: "Ludhiana", zone: "NORTH", category: "ENGINEERING", programs: 6, approvedSeats: 450, enrolled: 480, status: "APPROVED", violation: "Computer Science enrolled count exceeds AICTE sanctioned ceiling" },
-  { id: "AICTE-INST-2002", name: "Bangalore Premier Business Acad", affiliation: "Bangalore Univ", city: "Bengaluru", zone: "SOUTH", category: "PGDM", programs: 2, approvedSeats: 120, enrolled: 0, status: "SUSPENDED" },
-];
-
-const SAMPLE_SUMMARY: Summary = {
-  zone: "NORTH",
-  total: 17, approved: 14, underReview: 2, suspended: 1,
-  overIntakeAlerts: 3, pendingBatch: 5,
-};
 
 const SAMPLE_DOSSIERS: Record<string, Dossier> = {
   "AICTE-INST-1001": {
@@ -133,8 +119,8 @@ const complianceOf = (p: ProgramRow) =>
   p.enrolled > p.approved
     ? { label: "Over Limit", cls: "text-red-700", dot: "bg-red-500" }
     : p.enrolled === p.approved
-    ? { label: "At Capacity", cls: "text-amber-700", dot: "bg-amber-500" }
-    : { label: "Within Limit", cls: "text-emerald-700", dot: "" };
+      ? { label: "At Capacity", cls: "text-amber-700", dot: "bg-amber-500" }
+      : { label: "Within Limit", cls: "text-emerald-700", dot: "" };
 
 function getAuthHeaders(): Record<string, string> {
   if (typeof window === "undefined") return {};
@@ -178,7 +164,6 @@ export default function InstitutionDirectoryPage() {
   const [page, setPage] = useState(1);
 
   const [viewing, setViewing] = useState<Institution | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -193,9 +178,11 @@ export default function InstitutionDirectoryPage() {
         cache: "no-store",
       });
       if (res.ok) {
-        const json = (await res.json()) as { institutions: Institution[]; summary: Summary };
-        setItems(json.institutions);
-        setSummary(json.summary);
+        const json = await res.json();
+        const raw = (json && typeof json === "object" && "data" in json && json.data) ? json.data : json;
+        const instList = Array.isArray(raw?.institutions) ? raw.institutions : (Array.isArray(raw) ? raw : []);
+        setItems(instList);
+        if (raw?.summary) setSummary(raw.summary);
         setApiUp(true);
       } else if (res.status === 401 || res.status === 403) {
         setApiUp(true);
@@ -246,7 +233,7 @@ export default function InstitutionDirectoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900" onClick={() => setMenuOpen(false)}>
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* ------------------------------ Top bar ------------------------------ */}
       <header className="flex items-center justify-between border-b border-slate-200 bg-white px-8 py-4">
         <div className="flex items-center gap-3">
@@ -259,9 +246,8 @@ export default function InstitutionDirectoryPage() {
         </div>
         <div className="flex items-center gap-4">
           <span
-            className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-              apiUp ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"
-            }`}
+            className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${apiUp ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"
+              }`}
           >
             <span className={`h-2 w-2 rounded-full ${apiUp ? "bg-emerald-500" : "bg-red-500"}`} />
             {apiUp ? "API Connected (Port 8081)" : "API Unreachable (Port 8081)"}
@@ -475,7 +461,20 @@ function DossierModal({ inst, onClose }: { inst: Institution; onClose: () => voi
           cache: "no-store",
         });
         if (res.ok) {
-          if (!cancelled) setDossier((await res.json()) as Dossier);
+          const json = await res.json();
+          const raw = (json && typeof json === "object" && "data" in json && json.data) ? json.data : json;
+          const normalized: Dossier = {
+            zone: raw?.zone || inst.zone || "NORTH",
+            state: raw?.state || "N/A",
+            affiliation: raw?.affiliation || inst.affiliation || "N/A",
+            status: raw?.status || inst.status || "APPROVED",
+            validity: raw?.validity || "2026-2027",
+            lastSync: raw?.lastSync || new Date().toISOString(),
+            programs: Array.isArray(raw?.programs) ? raw.programs : [],
+            flaggedStudents: Array.isArray(raw?.flaggedStudents) ? raw.flaggedStudents : [],
+            syncLogs: Array.isArray(raw?.syncLogs) ? raw.syncLogs : [],
+          };
+          if (!cancelled) setDossier(normalized);
           return;
         }
         if (res.status === 401 || res.status === 403) {
@@ -493,7 +492,13 @@ function DossierModal({ inst, onClose }: { inst: Institution; onClose: () => voi
       } catch {
         if (cancelled) return;
         if (SAMPLE_DOSSIERS[inst.id]) {
-          setDossier(SAMPLE_DOSSIERS[inst.id]);
+          const s = SAMPLE_DOSSIERS[inst.id];
+          setDossier({
+            ...s,
+            programs: Array.isArray(s.programs) ? s.programs : [],
+            flaggedStudents: Array.isArray(s.flaggedStudents) ? s.flaggedStudents : [],
+            syncLogs: Array.isArray(s.syncLogs) ? s.syncLogs : [],
+          });
           setSample(true);
         } else {
           setError("The compliance dossier could not be loaded. Please ensure you are logged in with officer credentials.");
@@ -543,7 +548,7 @@ function DossierModal({ inst, onClose }: { inst: Institution; onClose: () => voi
     { key: "super", label: "Supernumerary Breakdown" },
     {
       key: "flagged",
-      label: `Flagged Students (${dossier?.flaggedStudents.length ?? 0})`,
+      label: `Flagged Students (${dossier?.flaggedStudents?.length ?? 0})`,
       extra: <AlertTriangle className="h-4 w-4 text-amber-500" />,
     },
     { key: "sync", label: "ERP Sync Logs" },
@@ -610,9 +615,8 @@ function DossierModal({ inst, onClose }: { inst: Institution; onClose: () => voi
                     role="tab"
                     aria-selected={tab === t.key}
                     onClick={() => setTab(t.key)}
-                    className={`-mb-px flex items-center gap-1.5 border-b-2 px-1 pb-2 ${
-                      tab === t.key ? "border-indigo-600 font-semibold text-slate-900" : "border-transparent text-slate-600 hover:text-slate-900"
-                    }`}
+                    className={`-mb-px flex items-center gap-1.5 border-b-2 px-1 pb-2 ${tab === t.key ? "border-indigo-600 font-semibold text-slate-900" : "border-transparent text-slate-600 hover:text-slate-900"
+                      }`}
                   >
                     {t.extra}
                     {t.label}
@@ -625,7 +629,7 @@ function DossierModal({ inst, onClose }: { inst: Institution; onClose: () => voi
                   <DataTable
                     head={["Program Code", "Degree & Branch", "Approved", "Enrolled", "Supernumerary (TFW/EWS/NRI)", "Compliance"]}
                     empty="No programs recorded."
-                    rows={dossier.programs.map((p) => {
+                    rows={(dossier.programs ?? []).map((p) => {
                       const c = complianceOf(p);
                       return [
                         <b key="c">{p.code}</b>,
@@ -646,21 +650,21 @@ function DossierModal({ inst, onClose }: { inst: Institution; onClose: () => voi
                   <DataTable
                     head={["Program Code", "TFW", "EWS", "NRI", "Total", "% of Approved"]}
                     empty="No programs recorded."
-                    rows={dossier.programs.map((p) => {
-                      const total = p.tfw + p.ews + p.nri;
+                    rows={(dossier.programs ?? []).map((p) => {
+                      const total = (p.tfw || 0) + (p.ews || 0) + (p.nri || 0);
                       return [<b key="c">{p.code}</b>, p.tfw, p.ews, p.nri, <b key="t">{total}</b>, `${pct(total, p.approved).toFixed(1)}%`];
                     })}
                   />
                 )}
 
                 {tab === "flagged" &&
-                  (dossier.flaggedStudents.length === 0 ? (
+                  ((dossier.flaggedStudents ?? []).length === 0 ? (
                     <p className="rounded-lg bg-slate-50 py-8 text-center text-slate-600">No flagged students for this institution.</p>
                   ) : (
                     <DataTable
                       head={["Student", "APAAR ID", "Reason"]}
                       empty=""
-                      rows={dossier.flaggedStudents.map((s) => [s.name, <span key="a" className="font-mono text-xs">{s.apaarId}</span>, s.reason])}
+                      rows={(dossier.flaggedStudents ?? []).map((s) => [s.name, <span key="a" className="font-mono text-xs">{s.apaarId}</span>, s.reason])}
                     />
                   ))}
 
@@ -668,10 +672,10 @@ function DossierModal({ inst, onClose }: { inst: Institution; onClose: () => voi
                   <DataTable
                     head={["Synced At", "Result", "Records", "Message"]}
                     empty="No sync runs recorded."
-                    rows={dossier.syncLogs.map((l) => [
+                    rows={(dossier.syncLogs ?? []).map((l) => [
                       formatSync(l.at),
                       <span key="r" className={`font-semibold ${l.ok ? "text-emerald-700" : "text-red-700"}`}>{l.ok ? "SUCCESS" : "FAILED"}</span>,
-                      l.records.toLocaleString("en-IN"),
+                      (l.records ?? 0).toLocaleString("en-IN"),
                       l.message,
                     ])}
                   />

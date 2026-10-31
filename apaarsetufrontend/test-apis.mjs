@@ -105,7 +105,7 @@ async function runComprehensiveTests() {
   }
 
   if (adminRefreshToken) {
-    const refreshResult = await test("Refresh Access Token", "POST", "/auth/refresh", {
+    await test("Refresh Access Token", "POST", "/auth/refresh", {
       refreshToken: adminRefreshToken,
     });
   }
@@ -123,11 +123,10 @@ async function runComprehensiveTests() {
   });
   const instAdminToken = instAdminAuth.data?.accessToken;
 
-  const instOpAuth = await test("Institution Operator Login", "POST", "/auth/login", {
+  await test("Institution Operator Login", "POST", "/auth/login", {
     email: instOpEmail,
     password: instOpPassword,
   });
-  const instOpToken = instOpAuth.data?.accessToken;
 
   const verifierAuth = await test("Authorized Verifier Login", "POST", "/auth/login", {
     email: verifierEmail,

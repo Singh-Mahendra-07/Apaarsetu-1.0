@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 /**
  * Supply chain patch for GHSA-vfj7-8cjw-p6xm (CWE-674 / CVE-2026-93687).
  * Adds recursive depth guards to braces compile.js and expand.js to protect

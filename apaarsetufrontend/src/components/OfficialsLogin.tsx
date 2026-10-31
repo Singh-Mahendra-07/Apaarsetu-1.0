@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -95,7 +95,7 @@ const ROLES: Role[] = [
   },
   {
     id: "verifier",
-    title: "Authorized Verifier",
+    title: "Academic AuthDesk",
     subtitle: "Employers and agencies",
     description:
       "Check the authenticity of student APAAR records and credentials.",
@@ -110,15 +110,21 @@ const ROLES: Role[] = [
   },
 ];
 
-export default function OfficialsLogin() {
-  const router = useRouter();
-  const { login } = useAuth();
+function OfficialsLoginContent() {
+  const searchParams = useSearchParams();
+  const { login, verifyMfa } = useAuth();
 
   const [selected, setSelected] = useState<RoleId | null>(null);
   const [subRole, setSubRole] = useState<SubRole>("ADMIN");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
+
+  const [showMfaModal, setShowMfaModal] = useState(false);
+  const [mfaOtp, setMfaOtp] = useState("");
+  const [mfaChallenge, setMfaChallenge] = useState<{ userId: string; challengeToken: string } | null>(null);
+  const [mfaSubmitting, setMfaSubmitting] = useState(false);
+  const [mfaError, setMfaError] = useState("");
 
   const [errors, setErrors] = useState<{
     identifier?: string;
@@ -133,6 +139,38 @@ export default function OfficialsLogin() {
   const idRef = useRef<HTMLInputElement>(null);
 
   const role = ROLES.find((r) => r.id === selected) ?? null;
+
+  const errorParam = searchParams.get("error");
+  const redirectParam = searchParams.get("redirect");
+
+  // Sync error or auto-select role from redirect query parameters
+  useEffect(() => {
+    if (errorParam === "invalid_token") {
+      setServerError("Your session has expired or token was invalid. Please sign in again.");
+    } else if (errorParam === "unauthorized_role") {
+      setServerError("Your account is not authorized to access that portal. Please sign in with an authorized account.");
+    }
+
+    if (redirectParam) {
+      if (redirectParam.startsWith("/institution")) {
+        setSelected((prev) => prev || "institution");
+        if (redirectParam.includes("operator")) {
+          setSubRole("OPERATOR");
+        } else {
+          setSubRole((prev) => (prev === "ADMIN" ? "INSTITUTION_ADMIN" : prev));
+        }
+      } else if (redirectParam.startsWith("/aicte")) {
+        setSelected((prev) => prev || "aicte");
+        if (redirectParam.includes("officer")) {
+          setSubRole("NODAL_OFFICER");
+        } else {
+          setSubRole((prev) => (prev === "INSTITUTION_ADMIN" ? "ADMIN" : prev));
+        }
+      } else if (redirectParam.startsWith("/authorized-verifier")) {
+        setSelected((prev) => prev || "verifier");
+      }
+    }
+  }, [errorParam, redirectParam]);
 
   // Check API availability.
   useEffect(() => {
@@ -285,17 +323,26 @@ export default function OfficialsLogin() {
           email = "admin@spce.ac.in";
         } else if (cleanId === "AICTE-NITP-3201" || cleanId === "AICTE-TEST-5827") {
           email = "gautam@nitp.ac.in";
-        } else if (role.id === "aicte") {
-          email = subRole === "NODAL_OFFICER" ? "officer@aicte.gov.in" : "admin@aicte.gov.in";
-        } else if (role.id === "institution") {
-          email = subRole === "OPERATOR" ? "operator@ditm.ac.in" : "admin@ditm.ac.in";
-        } else if (role.id === "verifier") {
-          email = "verifier@tcs.com";
+        } else {
+          setServerError("Please enter a valid official email address (e.g. name@aicte.gov.in)");
+          setSubmitting(false);
+          return;
         }
       }
 
       // Authenticate directly with Spring Boot backend through AuthContext
       const response = await login(email, password);
+
+      // Handle MFA challenge response
+      if (response.mfaRequired) {
+        setMfaChallenge({
+          userId: response.userId || "",
+          challengeToken: response.mfaChallengeToken || response.mfaToken || "",
+        });
+        setShowMfaModal(true);
+        setSubmitting(false);
+        return;
+      }
 
       // Verify role authorization
       const userRole = response.user?.role;
@@ -331,7 +378,18 @@ export default function OfficialsLogin() {
 
       // Select the correct destination for the chosen account type.
       let destination: string;
-      if (userRole && ROLE_TO_DASHBOARD[userRole]) {
+      if (
+        redirectParam &&
+        redirectParam.startsWith("/") &&
+        !redirectParam.startsWith("//") &&
+        ((userRole === "ROLE_INSTITUTION_ADMIN" && redirectParam.startsWith("/institution-admin")) ||
+          (userRole === "ROLE_INSTITUTION_OPERATOR" && redirectParam.startsWith("/institution-operator")) ||
+          (userRole === "ROLE_AICTE_ADMIN" && redirectParam.startsWith("/aicte-admin")) ||
+          (userRole === "ROLE_AICTE_OFFICER" && redirectParam.startsWith("/aicte-officer")) ||
+          (userRole === "ROLE_AUTHORIZED_VERIFIER" && redirectParam.startsWith("/authorized-verifier")))
+      ) {
+        destination = redirectParam;
+      } else if (userRole && ROLE_TO_DASHBOARD[userRole]) {
         destination = ROLE_TO_DASHBOARD[userRole];
       } else {
         destination =
@@ -340,7 +398,8 @@ export default function OfficialsLogin() {
             : DASHBOARD_ROUTES[subRole] || "/";
       }
 
-      router.push(destination);
+      // Use window.location.href to guarantee synchronous cookie propagation to edge middleware
+      window.location.href = destination;
     } catch (err: unknown) {
       const message =
         err instanceof Error
@@ -349,6 +408,34 @@ export default function OfficialsLogin() {
       setServerError(message);
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleMfaSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!mfaChallenge || mfaSubmitting) return;
+    if (!mfaOtp || mfaOtp.trim().length !== 6) {
+      setMfaError("Please enter a valid 6-digit verification code");
+      return;
+    }
+
+    setMfaSubmitting(true);
+    setMfaError("");
+
+    try {
+      const resp = await verifyMfa(mfaChallenge.userId, mfaOtp.trim(), mfaChallenge.challengeToken);
+      const userRole = resp.user?.role;
+      let destination: string;
+      if (userRole && ROLE_TO_DASHBOARD[userRole]) {
+        destination = ROLE_TO_DASHBOARD[userRole];
+      } else {
+        destination = DASHBOARD_ROUTES[subRole] || "/";
+      }
+      window.location.href = destination;
+    } catch (err: unknown) {
+      setMfaError(err instanceof Error ? err.message : "Invalid or expired MFA verification code");
+    } finally {
+      setMfaSubmitting(false);
     }
   }
 
@@ -378,8 +465,8 @@ export default function OfficialsLogin() {
             role="status"
             aria-live="polite"
             className={`inline-flex items-center gap-2 self-start rounded-full border px-3 py-2 text-xs font-semibold ${apiUp === false
-                ? "border-red-300 bg-red-500/20 text-red-100"
-                : "border-emerald-300/40 bg-emerald-400/15 text-emerald-100"
+              ? "border-red-300 bg-red-500/20 text-red-100"
+              : "border-emerald-300/40 bg-emerald-400/15 text-emerald-100"
               }`}
           >
             <span
@@ -387,10 +474,10 @@ export default function OfficialsLogin() {
                 }`}
             />
             {apiUp === null
-              ? "Checking API..."
+              ? "Connecting..."
               : apiUp
-                ? "API Connected (Port 8081)"
-                : "API Unreachable"}
+                ? "National Gateway Operational"
+                : "Gateway Connection Interrupted"}
           </span>
         </section>
 
@@ -504,8 +591,8 @@ export default function OfficialsLogin() {
                       aria-pressed={subRole === value}
                       onClick={() => setSubRole(value)}
                       className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${subRole === value
-                          ? "bg-white text-purple-700 shadow-sm"
-                          : "text-slate-600 hover:text-slate-900"
+                        ? "bg-white text-purple-700 shadow-sm"
+                        : "text-slate-600 hover:text-slate-900"
                         }`}
                     >
                       {label}
@@ -538,8 +625,8 @@ export default function OfficialsLogin() {
                       errors.identifier ? "identifier-error" : undefined
                     }
                     className={`w-full rounded-xl border bg-white py-3 pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-purple-200 ${errors.identifier
-                        ? "border-red-400"
-                        : "border-slate-300 focus:border-purple-500"
+                      ? "border-red-400"
+                      : "border-slate-300 focus:border-purple-500"
                       }`}
                   />
                 </div>
@@ -576,8 +663,8 @@ export default function OfficialsLogin() {
                       errors.password ? "password-error" : undefined
                     }
                     className={`w-full rounded-xl border bg-white py-3 pl-10 pr-11 text-sm outline-none focus:ring-2 focus:ring-purple-200 ${errors.password
-                        ? "border-red-400"
-                        : "border-slate-300 focus:border-purple-500"
+                      ? "border-red-400"
+                      : "border-slate-300 focus:border-purple-500"
                       }`}
                   />
 
@@ -605,25 +692,31 @@ export default function OfficialsLogin() {
                 )}
               </div>
 
-              {/* Seeded Credentials Hint for effortless testing */}
-              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-xs text-slate-600">
-                <span className="font-semibold text-slate-700">Seeded Credentials:</span>{" "}
-                {role.id === "aicte" && subRole === "ADMIN" && (
-                  <span className="font-mono text-purple-700">admin@aicte.gov.in / Admin@123</span>
-                )}
-                {role.id === "aicte" && subRole === "NODAL_OFFICER" && (
-                  <span className="font-mono text-purple-700">officer@aicte.gov.in / Officer@123</span>
-                )}
-                {role.id === "institution" && subRole === "INSTITUTION_ADMIN" && (
-                  <span className="font-mono text-purple-700">admin@ditm.ac.in (or AICTE-INST-1001) / InstAdmin@123</span>
-                )}
-                {role.id === "institution" && subRole === "OPERATOR" && (
-                  <span className="font-mono text-purple-700">operator@ditm.ac.in / Operator@123</span>
-                )}
-                {role.id === "verifier" && (
-                  <span className="font-mono text-purple-700">verifier@tcs.com / Verifier@123</span>
-                )}
-              </div>
+              {/* Seeded Sandbox Credentials (collapsible) */}
+              <details className="group rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-600 transition">
+                <summary className="cursor-pointer font-semibold text-slate-700 hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 rounded px-1 flex items-center justify-between">
+                  <span>Sandbox Demo Credentials</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 group-open:hidden">Show</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 hidden group-open:inline">Hide</span>
+                </summary>
+                <div className="mt-2.5 pt-2 border-t border-slate-200/80 space-y-1">
+                  {role.id === "aicte" && subRole === "ADMIN" && (
+                    <p className="font-mono text-purple-700">admin@aicte.gov.in / Admin@123</p>
+                  )}
+                  {role.id === "aicte" && subRole === "NODAL_OFFICER" && (
+                    <p className="font-mono text-purple-700">officer@aicte.gov.in / Officer@123</p>
+                  )}
+                  {role.id === "institution" && subRole === "INSTITUTION_ADMIN" && (
+                    <p className="font-mono text-purple-700">admin@ditm.ac.in (or AICTE-INST-1001) / InstAdmin@123 • gautam@nitp.ac.in / InstAdmin@123</p>
+                  )}
+                  {role.id === "institution" && subRole === "OPERATOR" && (
+                    <p className="font-mono text-purple-700">operator@ditm.ac.in / Operator@123</p>
+                  )}
+                  {role.id === "verifier" && (
+                    <p className="font-mono text-purple-700">verifier@tcs.com / Verifier@123</p>
+                  )}
+                </div>
+              </details>
 
               {serverError && (
                 <p
@@ -654,6 +747,81 @@ export default function OfficialsLogin() {
           </section>
         )}
       </div>
+
+      {showMfaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600">
+                <BadgeCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Two-Factor Authentication</h3>
+                <p className="text-xs text-slate-500">Enter the 6-digit code from your authenticator app</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleMfaSubmit} className="mt-5 space-y-4">
+              <div>
+                <label htmlFor="mfa-code" className="block text-xs font-semibold text-slate-700">
+                  6-Digit Security Code
+                </label>
+                <input
+                  id="mfa-code"
+                  type="text"
+                  maxLength={6}
+                  value={mfaOtp}
+                  onChange={(e) => setMfaOtp(e.target.value.replace(/[^0-9]/g, ""))}
+                  placeholder="000000"
+                  autoFocus
+                  className="mt-1.5 block w-full rounded-xl border border-slate-300 px-4 py-3 text-center text-2xl font-mono tracking-widest text-slate-900 focus:border-indigo-600 focus:outline-none focus:ring-4 focus:ring-indigo-100"
+                />
+              </div>
+
+              {mfaError && (
+                <p className="rounded-lg bg-red-50 p-2.5 text-xs font-medium text-red-700">
+                  {mfaError}
+                </p>
+              )}
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMfaModal(false);
+                    setMfaOtp("");
+                    setMfaError("");
+                  }}
+                  className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={mfaSubmitting || mfaOtp.length !== 6}
+                  className="flex-1 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {mfaSubmitting ? "Verifying..." : "Verify Code"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
+  );
+}
+
+export default function OfficialsLogin() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+        </main>
+      }
+    >
+      <OfficialsLoginContent />
+    </Suspense>
   );
 }

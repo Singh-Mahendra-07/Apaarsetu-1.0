@@ -57,8 +57,32 @@ public class JwtTokenProvider {
 
     private SecretKey key;
 
+    public static final String DEFAULT_INSECURE_JWT_SECRET = "ApaarSetuSecretKey2026MasterJwtTokenSignatureForNationalRegistryHS256SuperSecureProductionKey";
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private org.springframework.core.env.Environment env;
+
     @PostConstruct
     public void init() {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            throw new IllegalStateException("CRITICAL SECURITY ERROR: 'app.security.jwt-secret' must not be blank.");
+        }
+        if (DEFAULT_INSECURE_JWT_SECRET.equals(jwtSecret)) {
+            boolean isProd = false;
+            if (env != null) {
+                for (String profile : env.getActiveProfiles()) {
+                    if ("prod".equalsIgnoreCase(profile) || "production".equalsIgnoreCase(profile)) {
+                        isProd = true;
+                        break;
+                    }
+                }
+            }
+            if (isProd) {
+                throw new IllegalStateException("CRITICAL SECURITY VIOLATION: Production application cannot run with default insecure JWT secret. Define JWT_SECRET in environment.");
+            }
+            log.warn("SECURITY WARNING: Using default insecure JWT secret. This is prohibited in production!");
+        }
+
         byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
         if (keyBytes.length < 32) {
             throw new IllegalStateException("JWT secret key must be at least 256 bits (32 bytes) in length. Found " + keyBytes.length + " bytes.");

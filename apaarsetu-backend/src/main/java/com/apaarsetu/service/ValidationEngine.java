@@ -265,6 +265,61 @@ public class ValidationEngine {
 
                 bundle.getFlagsToRaise().add(capacityFlag);
             }
+
+            // Supernumerary Quota Validation
+            if (!isRegular && approvedProgram.getSupernumeraryQuota() != null && seatCat != null) {
+                int quotaLimit = 0;
+                String quotaName = "";
+                if (seatCat == SeatCategory.SUPERNUMERARY_TFW) {
+                    quotaLimit = approvedProgram.getSupernumeraryQuota().getTfw();
+                    quotaName = "TFW";
+                } else if (seatCat == SeatCategory.SUPERNUMERARY_EWS) {
+                    quotaLimit = approvedProgram.getSupernumeraryQuota().getEws();
+                    quotaName = "EWS";
+                } else if (seatCat == SeatCategory.SUPERNUMERARY_NRI) {
+                    quotaLimit = approvedProgram.getSupernumeraryQuota().getNri();
+                    quotaName = "NRI";
+                } else if (seatCat == SeatCategory.SUPERNUMERARY_OCI_FN) {
+                    quotaLimit = approvedProgram.getSupernumeraryQuota().getOciFn();
+                    quotaName = "OCI/FN";
+                } else if (seatCat == SeatCategory.SUPERNUMERARY_PMSSS) {
+                    quotaLimit = approvedProgram.getSupernumeraryQuota().getPmsss();
+                    quotaName = "PMSSS";
+                }
+
+                if (quotaName.length() > 0 && quotaLimit > 0) {
+                    long currentCategoryCount = studentRepository.countByInstitutionIdAndProgramCodeAndAcademicYearAndSeatCategoryAndAdmissionStatus(
+                            instId, programCode, academicYear, seatCat, AdmissionStatus.ADMITTED_ACTIVE);
+                    if ((currentCategoryCount + 1) > quotaLimit) {
+                        bundle.setOverallStatus(ValidationStatus.NEEDS_REVIEW);
+                        bundle.getErrorMessages().add("Supernumerary " + quotaName + " admissions count (" + (currentCategoryCount + 1) + ") exceeds sanctioned quota (" + quotaLimit + ")");
+
+                        bundle.getResults().add(Student.ValidationResult.builder()
+                                .ruleCode("CAPACITY_OVERFLOW")
+                                .status("FAILED")
+                                .message("Supernumerary " + quotaName + " count " + (currentCategoryCount + 1) + " breaches sanctioned quota limit of " + quotaLimit)
+                                .evaluatedAt(Instant.now())
+                                .build());
+
+                        Flag capacityFlag = Flag.builder()
+                                .flagType(FlagType.CAPACITY_OVERFLOW)
+                                .severity(FlagSeverity.HIGH)
+                                .apaarId(apaarId)
+                                .studentId(currentStudentId)
+                                .studentName(student.getPersonalInfo() != null ? student.getPersonalInfo().getFullName() : "Unknown")
+                                .primaryInstitutionId(instId)
+                                .primaryInstitutionName(institution != null ? institution.getName() : instId)
+                                .programCode(programCode)
+                                .academicYear(academicYear)
+                                .status(FlagStatus.PENDING)
+                                .notes("Sanctioned supernumerary " + quotaName + " quota for program " + programCode + " is " + quotaLimit + " but enrolled count is " + (currentCategoryCount + 1))
+                                .createdAt(Instant.now())
+                                .build();
+
+                        bundle.getFlagsToRaise().add(capacityFlag);
+                    }
+                }
+            }
         }
 
         return bundle;

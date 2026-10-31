@@ -15,7 +15,6 @@ import {
   Loader2,
   Lock,
   Search,
-  ShieldCheck,
   Unlock,
   X,
   UserPlus,
@@ -38,88 +37,6 @@ type Official = {
   verified: boolean;
   lastLogin: string;
 };
-
-const INST =
-  "Delhi Institute of Technology & Management [AICTE-INST-1001]";
-
-const SAMPLE: Official[] = [
-  {
-    id: "u1",
-    name: "Kavita Menon",
-    email: "k.menon@ditm.gcc.in",
-    role: "AICTE OFFICER",
-    scope: "NORTH ZONE",
-    zone: "NORTH ZONE",
-    status: "ACTIVE",
-    verified: true,
-    lastLogin: "Today 14:12",
-  },
-  {
-    id: "u2",
-    name: "Dr. Rajesh Sharma",
-    email: "principal@ditm.ac.in",
-    role: "AICTE OFFICER",
-    scope: INST,
-    status: "SUSPENDED",
-    verified: true,
-    lastLogin: "Today 14:12",
-  },
-  {
-    id: "u3",
-    name: "Dr. Rajesh Sharma",
-    email: "principal@ditm.ac.in",
-    role: "UNIVERSITY ADMIN",
-    scope: INST,
-    institutionId: "AICTE-INST-1001",
-    status: "ACTIVE",
-    verified: true,
-    lastLogin: "Today 14:12",
-  },
-  {
-    id: "u4",
-    name: "Dr. Rama Derav",
-    email: "k.manon@ditm.acc.in",
-    role: "UNIVERSITY ADMIN",
-    scope: INST,
-    institutionId: "AICTE-INST-1001",
-    status: "LOCKED",
-    verified: true,
-    lastLogin: "Today 14:12",
-  },
-  {
-    id: "u5",
-    name: "Dr. Bome Derar",
-    email: "principal@ditm.ac.in",
-    role: "UNIVERSITY ADMIN",
-    scope: INST,
-    institutionId: "AICTE-INST-1001",
-    status: "SUSPENDED",
-    verified: true,
-    lastLogin: "Today 14:12",
-  },
-  {
-    id: "u6",
-    name: "Dr. Bhir Mock",
-    email: "principal@ditm.ac.in",
-    role: "UNIVERSITY ADMIN",
-    scope: INST,
-    institutionId: "AICTE-INST-1001",
-    status: "SUSPENDED",
-    verified: true,
-    lastLogin: "Today 14:12",
-  },
-  {
-    id: "u7",
-    name: "Dr. Rajesh Sham",
-    email: "principal@ditm.ac.in",
-    role: "UNIVERSITY ADMIN",
-    scope: INST,
-    institutionId: "AICTE-INST-1001",
-    status: "SUSPENDED",
-    verified: true,
-    lastLogin: "Today 14:12",
-  },
-];
 
 const STATUS_CLS: Record<Status, string> = {
   ACTIVE: "bg-emerald-100 text-emerald-800",
@@ -536,16 +453,14 @@ export default function UsersPage() {
 
         <div className="flex items-center gap-3">
           <span
-            className={`hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs sm:flex sm:text-sm ${
-              apiUp
+            className={`hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs sm:flex sm:text-sm ${apiUp
                 ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                 : "border-red-200 bg-red-50 text-red-700"
-            }`}
+              }`}
           >
             <span
-              className={`h-2 w-2 rounded-full ${
-                apiUp ? "bg-emerald-500" : "bg-red-500"
-              }`}
+              className={`h-2 w-2 rounded-full ${apiUp ? "bg-emerald-500" : "bg-red-500"
+                }`}
             />
             {apiUp
               ? "API Connected (Port 8081)"
@@ -558,16 +473,16 @@ export default function UsersPage() {
       <main className="w-full px-4 py-6 sm:px-6 lg:px-8 2xl:px-10">
         {/* Register button below navbar */}
         <div className="mb-6 flex justify-end">
-<Link
-  href="/aicte-admin/user-management/register"
-  className="inline-flex w-fit items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
->
-  <UserPlus className="h-4 w-4" />
-  Register New User
-</Link>
+          <Link
+            href="/aicte-admin/user-management/register"
+            className="inline-flex w-fit items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            Register New User
+          </Link>
         </div>
 
-        
+
 
         <div className="mb-6 flex items-center gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
@@ -633,11 +548,10 @@ export default function UsersPage() {
                   role="tab"
                   aria-selected={tab === item.key}
                   onClick={() => setTab(item.key)}
-                  className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-                    tab === item.key
+                  className={`rounded-lg px-3 py-2 text-sm font-medium transition ${tab === item.key
                       ? "bg-indigo-600 text-white"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </button>
@@ -714,11 +628,10 @@ export default function UsersPage() {
                   <tr
                     key={u.id}
                     onClick={() => setSelectedId(u.id)}
-                    className={`cursor-pointer border-t border-slate-200 transition ${
-                      u.id === selectedId
+                    className={`cursor-pointer border-t border-slate-200 transition ${u.id === selectedId
                         ? "bg-indigo-50"
                         : "hover:bg-slate-50"
-                    }`}
+                      }`}
                   >
                     <td className="px-4 py-4">
                       <p className="font-semibold text-slate-900">{u.name}</p>

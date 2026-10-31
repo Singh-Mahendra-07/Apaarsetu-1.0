@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * ============================================================================
@@ -31,11 +32,13 @@ import java.util.Optional;
  * Component: DatabaseBootstrapInitializer (class)
  *
  * REASON & ARCHITECTURAL PURPOSE:
- * Component in the APAARSetu backend system supporting 'DatabaseBootstrapInitializer' functionality.
+ * Component in the APAARSetu backend system supporting
+ * 'DatabaseBootstrapInitializer' functionality.
  *
  * WORKING & FUNCTIONAL FLOW:
  * 1. Fulfills architectural requirements for DatabaseBootstrapInitializer.
- * 2. Integrates with the Spring Boot application context and associated domain services.
+ * 2. Integrates with the Spring Boot application context and associated domain
+ * services.
  * ============================================================================
  */
 @Slf4j
@@ -115,10 +118,12 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                         .supernumeraryQuota(sqIt)
                                         .build();
 
+                        String defaultErpSecret = System.getenv().getOrDefault("BOOTSTRAP_ERP_SECRET",
+                                        "erp-live-key-" + UUID.randomUUID().toString().substring(0, 8));
                         Institution.ErpApiKey liveKey = Institution.ErpApiKey.builder()
                                         .keyId("erp-ditm-live-01")
                                         .label("Default Campus ERP Connector")
-                                        .keyHash(passwordEncoder.encode("live-secret-key-999"))
+                                        .keyHash(passwordEncoder.encode(defaultErpSecret))
                                         .createdAt(Instant.now())
                                         .active(true)
                                         .build();
@@ -154,7 +159,8 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                 // Backfill leadership for AICTE-INST-1001 if already present in database
                 institutionRepository.findByAicteId("AICTE-INST-1001").ifPresent(inst -> {
                         if (inst.getHeadName() == null || inst.getNodalOfficerName() == null) {
-                                inst.setDescription("Master AICTE record of record. Official intake limits, supernumerary seat quotas, and university affiliations.");
+                                inst.setDescription(
+                                                "Master AICTE record of record. Official intake limits, supernumerary seat quotas, and university affiliations.");
                                 inst.setHeadName("Prof. Rajesh Sharma");
                                 inst.setHeadEmail("principal@ditm.ac.in");
                                 inst.setHeadPhone("+91 11 2788 0001");
@@ -231,17 +237,15 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                 String defaultOfficerPass = System.getenv().getOrDefault("BOOTSTRAP_OFFICER_PASSWORD", "Officer@123");
                 String defaultInstPass = System.getenv().getOrDefault("BOOTSTRAP_INST_ADMIN_PASSWORD", "InstAdmin@123");
                 String defaultOpPass = System.getenv().getOrDefault("BOOTSTRAP_OPERATOR_PASSWORD", "Operator@123");
-                String defaultVerifierPass = System.getenv().getOrDefault("BOOTSTRAP_VERIFIER_PASSWORD", "Verifier@123");
-                String defaultFallbackPass = System.getenv().getOrDefault("BOOTSTRAP_FALLBACK_PASSWORD", "Password@123");
-
+                String defaultVerifierPass = System.getenv().getOrDefault("BOOTSTRAP_VERIFIER_PASSWORD",
+                                "Verifier@123");
                 seedSingleUser(
                                 "admin@aicte.gov.in",
                                 "Central AICTE Administrator",
                                 UserRole.ROLE_AICTE_ADMIN,
                                 null,
                                 null,
-                                defaultAdminPass,
-                                defaultFallbackPass);
+                                defaultAdminPass);
 
                 seedSingleUser(
                                 "officer@aicte.gov.in",
@@ -249,8 +253,7 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                 UserRole.ROLE_AICTE_OFFICER,
                                 null,
                                 RegionZone.NORTH,
-                                defaultOfficerPass,
-                                defaultFallbackPass);
+                                defaultOfficerPass);
 
                 seedSingleUser(
                                 "officer.north@aicte.gov.in",
@@ -258,7 +261,6 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                 UserRole.ROLE_AICTE_OFFICER,
                                 null,
                                 RegionZone.NORTH,
-                                defaultFallbackPass,
                                 defaultOfficerPass);
 
                 seedSingleUser(
@@ -267,8 +269,7 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                 UserRole.ROLE_INSTITUTION_ADMIN,
                                 "AICTE-INST-1001",
                                 null,
-                                defaultInstPass,
-                                defaultFallbackPass);
+                                defaultInstPass);
 
                 seedSingleUser(
                                 "registrar@ditm.ac.in",
@@ -276,7 +277,6 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                 UserRole.ROLE_INSTITUTION_ADMIN,
                                 "AICTE-INST-1001",
                                 null,
-                                defaultFallbackPass,
                                 defaultInstPass);
 
                 seedSingleUser(
@@ -285,8 +285,7 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                 UserRole.ROLE_INSTITUTION_OPERATOR,
                                 "AICTE-INST-1001",
                                 null,
-                                defaultOpPass,
-                                defaultFallbackPass);
+                                defaultOpPass);
 
                 seedSingleUser(
                                 "verifier@tcs.com",
@@ -294,17 +293,15 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                 UserRole.ROLE_AUTHORIZED_VERIFIER,
                                 null,
                                 null,
-                                defaultVerifierPass,
-                                defaultFallbackPass);
+                                defaultVerifierPass);
 
                 seedSingleUser(
                                 "gautam@nitp.ac.in",
                                 "Gautam (NIT Patna Admin)",
                                 UserRole.ROLE_INSTITUTION_ADMIN,
-                                "AICTE-TEST-5827",
+                                "AICTE-NITP-3201",
                                 RegionZone.NORTH,
-                                System.getenv().getOrDefault("BOOTSTRAP_NITP_PASSWORD", "8zaBf@9qt54%bA&@"),
-                                defaultFallbackPass);
+                                System.getenv().getOrDefault("BOOTSTRAP_NITP_PASSWORD", "InstAdmin@123"));
 
                 seedSingleUser(
                                 "asingh@aicte.gov.in",
@@ -312,12 +309,11 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                 UserRole.ROLE_AICTE_OFFICER,
                                 null,
                                 RegionZone.EAST,
-                                System.getenv().getOrDefault("BOOTSTRAP_ASINGH_PASSWORD", "J#fL5m?ka4AkEWtZ"),
-                                defaultOfficerPass);
+                                System.getenv().getOrDefault("BOOTSTRAP_ASINGH_PASSWORD", "J#fL5m?ka4AkEWtZ"));
         }
 
         private void seedSingleUser(String email, String fullName, UserRole role, String instId, RegionZone zone,
-                        String pass1, String pass2) {
+                        String password) {
                 if (!userRepository.existsByEmail(email)) {
                         User u = User.builder()
                                         .email(email)
@@ -325,8 +321,7 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                         .role(role)
                                         .institutionId(instId)
                                         .region(zone)
-                                        .passwordHash(passwordEncoder.encode(pass1))
-                                        .secondaryPasswordHash(passwordEncoder.encode(pass2))
+                                        .passwordHash(passwordEncoder.encode(password))
                                         .status(UserStatus.ACTIVE)
                                         .mfaEnabled(false)
                                         .createdAt(Instant.now())
@@ -457,24 +452,30 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                         .or(() -> studentRepository.findAll().stream().findFirst());
                         if (studentOpt.isPresent()) {
                                 Student s = studentOpt.get();
-                                String sName = (s.getPersonalInfo() != null && s.getPersonalInfo().getFullName() != null)
-                                                ? s.getPersonalInfo().getFullName() : "Rohan Verma";
+                                String sName = (s.getPersonalInfo() != null
+                                                && s.getPersonalInfo().getFullName() != null)
+                                                                ? s.getPersonalInfo().getFullName()
+                                                                : "Rohan Verma";
                                 Flag flag = Flag.builder()
                                                 .apaarId(s.getApaarId())
                                                 .studentId(s.getId())
                                                 .studentName(sName)
                                                 .flagType(FlagType.DUPLICATE_CONCURRENT_ENROLLMENT)
                                                 .severity(FlagSeverity.CRITICAL)
-                                                .primaryInstitutionId(s.getInstitutionId() != null ? s.getInstitutionId() : "AICTE-INST-1001")
+                                                .primaryInstitutionId(
+                                                                s.getInstitutionId() != null ? s.getInstitutionId()
+                                                                                : "AICTE-INST-1001")
                                                 .primaryInstitutionName("Delhi Institute of Technology & Management")
                                                 .conflictingInstitutionId("AICTE-INST-1002")
-                                                .conflictingInstitutionName("Mumbai Metropolitan College of Engineering")
+                                                .conflictingInstitutionName(
+                                                                "Mumbai Metropolitan College of Engineering")
                                                 .status(FlagStatus.PENDING)
                                                 .notes("Active admission record concurrently detected in Mumbai Metropolitan College of Engineering.")
                                                 .createdAt(Instant.now())
                                                 .build();
                                 flagRepository.save(flag);
-                                log.info("Initialized sample dispute flag for student '{}' ({})", s.getApaarId(), sName);
+                                log.info("Initialized sample dispute flag for student '{}' ({})", s.getApaarId(),
+                                                sName);
                         }
                 }
 
@@ -489,7 +490,9 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
 
         private void seedUploadBatches() {
                 if (!uploadBatchRepository.existsById("BATCH-9921")
-                                || uploadBatchRepository.findById("BATCH-9921").map(b -> b.getErrors() == null || b.getErrors().isEmpty()).orElse(false)) {
+                                || uploadBatchRepository.findById("BATCH-9921")
+                                                .map(b -> b.getErrors() == null || b.getErrors().isEmpty())
+                                                .orElse(false)) {
                         List<UploadBatch.BatchErrorEmbed> errors9921 = List.of(
                                         UploadBatch.BatchErrorEmbed.builder()
                                                         .rowNumber(14)
@@ -526,8 +529,7 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                                         .ruleCode("DOB_RANGE")
                                                         .errorMessage("DOB mismatch")
                                                         .invalidValue("1990-01-01")
-                                                        .build()
-                        );
+                                                        .build());
 
                         UploadBatch b1 = UploadBatch.builder()
                                         .id("BATCH-9921")
@@ -607,7 +609,8 @@ public class DatabaseBootstrapInitializer implements CommandLineRunner {
                                         .totalRows(25)
                                         .status(BatchStatus.REJECTED)
                                         .uploadedBy("operator@ditm.ac.in")
-                                        .rejectionReason("Duplicate concurrent admissions detected and unverified certificates.")
+                                        .rejectionReason(
+                                                        "Duplicate concurrent admissions detected and unverified certificates.")
                                         .rejectedBy("admin@ditm.ac.in")
                                         .rejectedAt(Instant.now().minusSeconds(172800))
                                         .summary(UploadBatch.BatchSummaryEmbed.builder()

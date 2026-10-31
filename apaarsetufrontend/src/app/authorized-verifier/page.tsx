@@ -1,23 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   ShieldCheck,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   Search,
   QrCode,
   FileCheck2,
-  Building2,
-  GraduationCap,
   RefreshCw,
   Loader2,
-  BadgeCheck,
 } from "lucide-react";
 import { verificationApi } from "@/lib/api";
 import { VerifiedCredentialDTO, VerificationToken, VerificationPurpose } from "@/types/api";
+import AuthorizedVerifierProfileDropdown from "@/components/layout/AuthorizedVerifierProfileDropdown";
 
 export default function AuthorizedVerifierDashboard() {
   const [activeTab, setActiveTab] = useState<"qr" | "manual" | "history">("qr");
@@ -111,10 +107,11 @@ export default function AuthorizedVerifierDashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300 border border-emerald-500/30">
             DPDP Act 2023 Compliant
           </span>
+          <AuthorizedVerifierProfileDropdown />
         </div>
       </div>
 
@@ -125,11 +122,10 @@ export default function AuthorizedVerifierDashboard() {
             setActiveTab("qr");
             setError(null);
           }}
-          className={`flex items-center gap-2 border-b-2 px-6 py-3 transition ${
-            activeTab === "qr"
+          className={`flex items-center gap-2 border-b-2 px-6 py-3 transition ${activeTab === "qr"
               ? "border-blue-600 text-blue-600 font-bold"
               : "border-transparent hover:text-slate-900"
-          }`}
+            }`}
         >
           <QrCode size={18} />
           QR Payload Scanner
@@ -140,11 +136,10 @@ export default function AuthorizedVerifierDashboard() {
             setActiveTab("manual");
             setError(null);
           }}
-          className={`flex items-center gap-2 border-b-2 px-6 py-3 transition ${
-            activeTab === "manual"
+          className={`flex items-center gap-2 border-b-2 px-6 py-3 transition ${activeTab === "manual"
               ? "border-blue-600 text-blue-600 font-bold"
               : "border-transparent hover:text-slate-900"
-          }`}
+            }`}
         >
           <Search size={18} />
           Consent-Gated APAAR Lookup
@@ -155,11 +150,10 @@ export default function AuthorizedVerifierDashboard() {
             setActiveTab("history");
             loadHistory();
           }}
-          className={`flex items-center gap-2 border-b-2 px-6 py-3 transition ${
-            activeTab === "history"
+          className={`flex items-center gap-2 border-b-2 px-6 py-3 transition ${activeTab === "history"
               ? "border-blue-600 text-blue-600 font-bold"
               : "border-transparent hover:text-slate-900"
-          }`}
+            }`}
         >
           <FileCheck2 size={18} />
           Agency Audit History ({history.length})

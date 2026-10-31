@@ -2,28 +2,20 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
-  AlertTriangle,
   ArrowLeft,
-  Bell,
-  Building2,
   Camera,
   Check,
   Eye,
   EyeOff,
   KeyRound,
   Loader2,
-  LogOut,
   Mail,
-  RefreshCw,
   Save,
   ShieldCheck,
   Trash2,
   Upload,
-  UserCheck,
   UserCog,
-  UserRound,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import OfficerProfileDropdown from "@/components/layout/OfficerProfileDropdown";
@@ -83,8 +75,7 @@ const passwordChecks = (pw: string) => [
 /* --------------------------------- Page --------------------------------- */
 
 export default function OfficerSystemSettingPage() {
-  const { user, refreshProfile, logout } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
   const [apiUp, setApiUp] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -115,20 +106,18 @@ export default function OfficerSystemSettingPage() {
 
         <div className="flex items-center gap-4">
           <span
-            className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-              apiUp
+            className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${apiUp
                 ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                 : "border-red-200 bg-red-50 text-red-700"
-            }`}
+              }`}
           >
             <span
-              className={`h-2 w-2 rounded-full ${
-                apiUp ? "bg-emerald-500" : "bg-red-500"
-              }`}
+              className={`h-2 w-2 rounded-full ${apiUp ? "bg-emerald-500" : "bg-red-500"
+                }`}
             />
             {apiUp
-              ? "API Connected (Port 8081)"
-              : "API Unreachable (Port 8081)"}
+              ? "National Gateway Operational"
+              : "National Gateway Offline"}
           </span>
 
           <OfficerProfileDropdown />
@@ -532,8 +521,8 @@ function PasswordCard() {
     passed <= 1
       ? { label: "Weak", cls: "bg-red-500" }
       : passed <= 3
-      ? { label: "Fair", cls: "bg-amber-500" }
-      : { label: "Strong", cls: "bg-emerald-500" };
+        ? { label: "Fair", cls: "bg-amber-500" }
+        : { label: "Strong", cls: "bg-emerald-500" };
   const mismatch = confirm.length > 0 && confirm !== next;
 
   const submit = async (e: React.FormEvent) => {
@@ -639,14 +628,12 @@ function PasswordCard() {
               {checks.map((c) => (
                 <li
                   key={c.label}
-                  className={`flex items-center gap-1.5 ${
-                    c.ok ? "text-emerald-700 font-medium" : "text-slate-500"
-                  }`}
+                  className={`flex items-center gap-1.5 ${c.ok ? "text-emerald-700 font-medium" : "text-slate-500"
+                    }`}
                 >
                   <Check
-                    className={`h-3.5 w-3.5 ${
-                      c.ok ? "text-emerald-600" : "opacity-30"
-                    }`}
+                    className={`h-3.5 w-3.5 ${c.ok ? "text-emerald-600" : "opacity-30"
+                      }`}
                   />
                   {c.label}
                 </li>
@@ -866,9 +853,8 @@ function NoticeLine({ notice }: { notice: Notice }) {
     <p
       role="status"
       aria-live="polite"
-      className={`text-sm font-medium ${
-        notice.ok ? "text-emerald-700" : "text-red-600"
-      }`}
+      className={`text-sm font-medium ${notice.ok ? "text-emerald-700" : "text-red-600"
+        }`}
     >
       {notice.text}
     </p>

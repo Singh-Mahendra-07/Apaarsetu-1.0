@@ -42,16 +42,6 @@ const ZONES: Zone[] = [
   { key: "CENTRAL", label: "CENTRAL ZONE", disputes: 0, states: "CENTRAL (3 States) – MP, CG, UP (East)" },
 ];
 
-const SAMPLE_OFFICERS: Officer[] = [
-  { id: "o1", name: "Dr. Amit Roy", email: "a.roy@aicte.gov.in", zone: "NORTH", duty: "ON_DUTY", open: 14, resolved: 182 },
-  { id: "o2", name: "Kavita Menon", email: "k.menon@aicte.gov.in", zone: "NORTH", duty: "ON_DUTY", open: 0, resolved: 64 },
-  { id: "o3", name: "Sanjay Deshmukh", email: "s.deshmukh@aicte.gov.in", zone: "WEST", duty: "ON_LEAVE", open: 8, resolved: 94 },
-  { id: "o4", name: "Srinivas Rao", email: "s.rao@aicte.gov.in", zone: "SOUTH", duty: "ON_DUTY", open: 9, resolved: 112 },
-  { id: "o5", name: "Pradeep Paul", email: "p.paul@aicte.gov.in", zone: "EAST", duty: "SUSPENDED", open: 11, resolved: 55 },
-];
-
-const SAMPLE_SUMMARY: Summary = { criticalFlags: 8, turnaroundHrs: 18.4 };
-
 const DUTY_CLS: Record<Duty, { badge: string; dot: string }> = {
   ON_DUTY: { badge: "bg-emerald-50 text-emerald-800", dot: "bg-emerald-500" },
   ON_LEAVE: { badge: "bg-amber-50 text-amber-800", dot: "bg-amber-500" },
@@ -175,6 +165,12 @@ export default function OfficersPage() {
           </p>
           <h2 className="text-xl font-bold">Central Control Center</h2>
         </div>
+        <div className="flex items-center gap-4">
+          <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold ${apiUp ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-red-200 bg-red-50 text-red-700"}`}>
+            <span className={`h-2 w-2 rounded-full ${apiUp ? "bg-emerald-500" : "bg-red-500"}`} />
+            {apiUp ? "Central API Online" : "Central API Offline"}
+          </div>
+        </div>
       </header>
 
       <main className="mx-auto max-w-7xl px-8 py-6">
@@ -214,13 +210,12 @@ export default function OfficersPage() {
                 key={z.key}
                 onClick={() => setZoneFilter(active ? "All" : z.key)}
                 aria-pressed={active}
-                className={`rounded-xl border p-4 text-left shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-                  gap
+                className={`rounded-xl border p-4 text-left shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${gap
                     ? "border-red-300 bg-amber-50"
                     : active
-                    ? "border-indigo-500 bg-indigo-50"
-                    : "border-slate-200 bg-white hover:border-indigo-300"
-                }`}
+                      ? "border-indigo-500 bg-indigo-50"
+                      : "border-slate-200 bg-white hover:border-indigo-300"
+                  }`}
               >
                 <p className="font-bold">{z.label}</p>
                 <p className="mt-1 text-sm text-slate-700">

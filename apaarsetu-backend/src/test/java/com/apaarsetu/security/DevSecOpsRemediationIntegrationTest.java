@@ -225,7 +225,6 @@ public class DevSecOpsRemediationIntegrationTest {
                 .id("user-secret-test")
                 .email("security.test@example.com")
                 .passwordHash("$2a$10$hashedPasswordHere1234567890")
-                .secondaryPasswordHash("$2a$10$secondaryHashedPassword")
                 .mfaSecret("JBSWY3DPEHPK3PXP")
                 .failedLoginAttempts(3)
                 .build();

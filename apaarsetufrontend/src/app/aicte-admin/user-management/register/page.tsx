@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
-  Bell,
   Building2,
   Check,
   CheckCircle2,
@@ -15,7 +14,6 @@ import {
   FileText,
   Loader2,
   Rocket,
-  ShieldCheck,
   UploadCloud,
   UserCog,
   X,
@@ -58,11 +56,6 @@ type InstitutionOption = {
   display: string;
 };
 
-const FALLBACK_INSTITUTIONS: InstitutionOption[] = [
-  { id: "AICTE-INST-1001", aicteId: "AICTE-INST-1001", name: "Delhi Institute of Technology & Management", display: "AICTE-INST-1001 – Delhi Institute of Technology & Management" },
-  { id: "AICTE-INST-1002", aicteId: "AICTE-INST-1002", name: "Mumbai Metropolitan College of Engineering", display: "AICTE-INST-1002 – Mumbai Metropolitan College of Engineering" },
-  { id: "AICTE-NITP-3201", aicteId: "AICTE-NITP-3201", name: "National Institute of Technology Patna", display: "AICTE-NITP-3201 – National Institute of Technology Patna" },
-];
 
 const PRIVILEGES: Record<AccountType, { key: string; label: string; locked?: boolean }[]> = {
   AICTE_OFFICER: [
@@ -345,11 +338,10 @@ export default function RegisterOfficialPage() {
         </div>
         <div className="flex items-center gap-4">
           <span
-            className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-              apiUp
+            className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${apiUp
                 ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                 : "border-red-200 bg-red-50 text-red-700"
-            }`}
+              }`}
           >
             <span className={`h-2 w-2 rounded-full ${apiUp ? "bg-emerald-500" : "bg-red-500"}`} />
             {apiUp ? "API Connected (Port 8081)" : "API Unreachable (Port 8081)"}
@@ -422,18 +414,16 @@ export default function RegisterOfficialPage() {
                   {i > 0 && <span className="h-px w-10 bg-slate-300" />}
                   <span
                     aria-current={step === s.n ? "step" : undefined}
-                    className={`flex items-center gap-2 font-medium ${
-                      step === s.n ? "text-indigo-700" : step > s.n ? "text-emerald-700" : "text-slate-500"
-                    }`}
+                    className={`flex items-center gap-2 font-medium ${step === s.n ? "text-indigo-700" : step > s.n ? "text-emerald-700" : "text-slate-500"
+                      }`}
                   >
                     <span
-                      className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
-                        step === s.n
+                      className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${step === s.n
                           ? "bg-indigo-600 text-white"
                           : step > s.n
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-slate-200 text-slate-600"
-                      }`}
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-slate-200 text-slate-600"
+                        }`}
                     >
                       {step > s.n ? <Check className="h-4 w-4" /> : s.n}
                     </span>
@@ -684,9 +674,8 @@ export default function RegisterOfficialPage() {
                       setDragging(false);
                       takeFile(e.dataTransfer.files?.[0]);
                     }}
-                    className={`mt-2 rounded-xl border-2 border-dashed p-5 text-sm ${
-                      dragging ? "border-indigo-500 bg-indigo-50" : errors.file ? "border-red-300" : "border-slate-300"
-                    }`}
+                    className={`mt-2 rounded-xl border-2 border-dashed p-5 text-sm ${dragging ? "border-indigo-500 bg-indigo-50" : errors.file ? "border-red-300" : "border-slate-300"
+                      }`}
                   >
                     {file ? (
                       <div className="flex items-center gap-2 font-medium">
@@ -831,9 +820,8 @@ function TypeCard({
 }) {
   return (
     <label
-      className={`flex cursor-pointer items-center gap-4 rounded-xl border p-4 ${
-        checked ? "border-indigo-500 bg-indigo-50" : "border-slate-300 bg-white hover:border-indigo-300"
-      }`}
+      className={`flex cursor-pointer items-center gap-4 rounded-xl border p-4 ${checked ? "border-indigo-500 bg-indigo-50" : "border-slate-300 bg-white hover:border-indigo-300"
+        }`}
     >
       <input type="radio" name="accountType" checked={checked} onChange={onSelect} className="h-4 w-4 accent-indigo-600" />
       <span className={checked ? "text-indigo-600" : "text-slate-500"}>{icon}</span>
@@ -858,14 +846,12 @@ function Switch({
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-        checked ? "bg-emerald-500" : "bg-slate-300"
-      }`}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${checked ? "bg-emerald-500" : "bg-slate-300"
+        }`}
     >
       <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${
-          checked ? "left-[22px]" : "left-0.5"
-        }`}
+        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${checked ? "left-[22px]" : "left-0.5"
+          }`}
       />
     </button>
   );

@@ -23,38 +23,6 @@ type Request = {
   status: string;
 };
 
-const initialRequests: Request[] = [
-  {
-    id: "VR-2026-001",
-    name: "Rahul Sharma",
-    apaar: "XXXX-XXXX-4821",
-    institution: "Delhi Institute of Technology",
-    course: "B.Tech Computer Science",
-    year: "2026-27",
-    date: "22 Oct 2026",
-    status: "Pending",
-  },
-  {
-    id: "VR-2026-002",
-    name: "Priya Singh",
-    apaar: "XXXX-XXXX-7392",
-    institution: "Bangalore Premier Business Academy",
-    course: "PGDM",
-    year: "2026-27",
-    date: "21 Oct 2026",
-    status: "Under Review",
-  },
-  {
-    id: "VR-2026-003",
-    name: "Aman Kumar",
-    apaar: "XXXX-XXXX-1645",
-    institution: "Delhi Institute of Technology",
-    course: "B.Tech Mechanical",
-    year: "2025-26",
-    date: "20 Oct 2026",
-    status: "Correction Required",
-  },
-];
 
 const sections: Record<string, { title: string; description: string }> = {
   requests: {
@@ -87,9 +55,8 @@ function StatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-        style[status] ?? "bg-slate-100 text-slate-700"
-      }`}
+      className={`rounded-full px-3 py-1 text-xs font-semibold ${style[status] ?? "bg-slate-100 text-slate-700"
+        }`}
     >
       {status}
     </span>
@@ -253,10 +220,10 @@ function VerifierSectionInner() {
         section === "exceptions"
           ? ["Correction Required", "Escalated", "Rejected"].includes(record.status)
           : section === "history"
-          ? ["Verified", "Rejected", "Correction Required"].includes(record.status)
-          : section === "requests"
-          ? ["Pending", "Under Review"].includes(record.status)
-          : true;
+            ? ["Verified", "Rejected", "Correction Required"].includes(record.status)
+            : section === "requests"
+              ? ["Pending", "Under Review"].includes(record.status)
+              : true;
 
       return matchesSearch && matchesFilter && matchesSection;
     });
@@ -267,8 +234,7 @@ function VerifierSectionInner() {
       prev.map((r) => (r.id === id ? { ...r, status } : r))
     );
     setNotice(
-      `${id}: Decision updated to "${status}". ${
-        comment ? `Notes: ${comment}` : ""
+      `${id}: Decision updated to "${status}". ${comment ? `Notes: ${comment}` : ""
       }`
     );
   }
@@ -369,30 +335,30 @@ function VerifierSectionInner() {
                 </tr>
               ) : (
                 visibleRecords.map((record) => (
-                <tr key={record.id} className="hover:bg-slate-50">
-                  <td className="px-5 py-3.5">
-                    <p className="font-semibold text-slate-900">{record.name}</p>
-                    <p className="font-mono text-[11px] text-slate-400">{record.id}</p>
-                  </td>
-                  <td className="px-5 py-3.5 font-mono font-bold text-indigo-700">{record.apaar}</td>
-                  <td className="px-5 py-3.5">
-                    <p className="font-medium text-slate-800">{record.institution}</p>
-                    <p className="text-[11px] text-slate-500">{record.course}</p>
-                  </td>
-                  <td className="px-5 py-3.5 text-slate-600">{record.year}</td>
-                  <td className="px-5 py-3.5">
-                    <StatusBadge status={record.status} />
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <Link
-                      href={`/authorized-verifier/verify-student?id=${record.id}`}
-                      className="font-bold text-blue-600 hover:underline"
-                    >
-                      Review Record
-                    </Link>
-                  </td>
-                </tr>
-              )))}
+                  <tr key={record.id} className="hover:bg-slate-50">
+                    <td className="px-5 py-3.5">
+                      <p className="font-semibold text-slate-900">{record.name}</p>
+                      <p className="font-mono text-[11px] text-slate-400">{record.id}</p>
+                    </td>
+                    <td className="px-5 py-3.5 font-mono font-bold text-indigo-700">{record.apaar}</td>
+                    <td className="px-5 py-3.5">
+                      <p className="font-medium text-slate-800">{record.institution}</p>
+                      <p className="text-[11px] text-slate-500">{record.course}</p>
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-600">{record.year}</td>
+                    <td className="px-5 py-3.5">
+                      <StatusBadge status={record.status} />
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <Link
+                        href={`/authorized-verifier/verify-student?id=${record.id}`}
+                        className="font-bold text-blue-600 hover:underline"
+                      >
+                        Review Record
+                      </Link>
+                    </td>
+                  </tr>
+                )))}
             </tbody>
           </table>
         </div>

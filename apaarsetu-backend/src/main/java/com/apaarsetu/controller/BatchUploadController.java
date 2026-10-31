@@ -59,7 +59,7 @@ public class BatchUploadController {
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN')")
+    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'ERP_CLIENT')")
     public ResponseEntity<ApiResponse<BatchResponseDTO>> uploadBatch(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "academicYear", required = false, defaultValue = "2026-27") String academicYear,
@@ -79,7 +79,7 @@ public class BatchUploadController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'AICTE_OFFICER')")
+    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'AICTE_OFFICER', 'ERP_CLIENT')")
     public ResponseEntity<ApiResponse<PagedResponse<BatchResponseDTO>>> getBatches(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -91,7 +91,7 @@ public class BatchUploadController {
     }
 
     @GetMapping("/{batchId}")
-    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'AICTE_OFFICER')")
+    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'AICTE_OFFICER', 'ERP_CLIENT')")
     public ResponseEntity<ApiResponse<BatchDetailDTO>> getBatchById(
             @PathVariable String batchId,
             @AuthenticationPrincipal UserPrincipal principal) {
@@ -101,7 +101,7 @@ public class BatchUploadController {
     }
 
     @GetMapping("/{batchId}/errors")
-    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'AICTE_OFFICER')")
+    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'AICTE_OFFICER', 'ERP_CLIENT')")
     public ResponseEntity<ApiResponse<List<BatchErrorDTO>>> getBatchErrors(
             @PathVariable String batchId,
             @AuthenticationPrincipal UserPrincipal principal) {
@@ -111,7 +111,7 @@ public class BatchUploadController {
     }
 
     @GetMapping("/{batchId}/records")
-    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'AICTE_OFFICER')")
+    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'AICTE_OFFICER', 'ERP_CLIENT')")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getBatchRecords(
             @PathVariable String batchId,
             @AuthenticationPrincipal UserPrincipal principal) {

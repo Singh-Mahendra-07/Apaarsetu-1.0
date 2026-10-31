@@ -5,8 +5,6 @@ import Link from "next/link";
 import {
   FileText,
   Loader2,
-  RefreshCw,
-  Search,
   CheckCircle2,
   AlertTriangle,
   AlertCircle,
@@ -59,10 +57,10 @@ function ago(iso?: string) {
   return m < 1
     ? "just now"
     : m < 60
-    ? `${m}m ago`
-    : m < 1440
-    ? `${Math.round(m / 60)}h ago`
-    : `${Math.round(m / 1440)}d ago`;
+      ? `${m}m ago`
+      : m < 1440
+        ? `${Math.round(m / 60)}h ago`
+        : `${Math.round(m / 1440)}d ago`;
 }
 
 export default function OperatorSubmissionsPage() {
@@ -144,19 +142,18 @@ export default function OperatorSubmissionsPage() {
             key={tab}
             type="button"
             onClick={() => setFilterTab(tab)}
-            className={`rounded-xl px-4 py-2 text-xs font-semibold transition ${
-              filterTab === tab
+            className={`rounded-xl px-4 py-2 text-xs font-semibold transition ${filterTab === tab
                 ? "bg-slate-900 text-white shadow-xs"
                 : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
+              }`}
           >
             {tab.replace("_", " ")}
             <span className="ml-1.5 rounded-full bg-slate-200/60 px-1.5 py-0.2 text-[10px] text-slate-700">
               {tab === "ALL"
                 ? batches.length
                 : tab === "NEEDS_ACTION"
-                ? batches.filter((b) => (b.invalidRecordsCount || 0) > 0 && b.status !== "APPROVED").length
-                : batches.filter((b) => b.status === tab).length}
+                  ? batches.filter((b) => (b.invalidRecordsCount || 0) > 0 && b.status !== "APPROVED").length
+                  : batches.filter((b) => b.status === tab).length}
             </span>
           </button>
         ))}

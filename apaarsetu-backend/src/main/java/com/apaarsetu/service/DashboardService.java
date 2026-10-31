@@ -4,10 +4,35 @@ import com.apaarsetu.common.dto.PagedResponse;
 import com.apaarsetu.common.exception.BadRequestException;
 import com.apaarsetu.common.exception.ForbiddenException;
 import com.apaarsetu.common.exception.ResourceNotFoundException;
-import com.apaarsetu.domain.*;
-import com.apaarsetu.domain.enums.*;
-import com.apaarsetu.dto.*;
-import com.apaarsetu.repository.*;
+import com.apaarsetu.domain.AuditLog;
+import com.apaarsetu.domain.Flag;
+import com.apaarsetu.domain.Institution;
+import com.apaarsetu.domain.Student;
+import com.apaarsetu.domain.enums.AdmissionStatus;
+import com.apaarsetu.domain.enums.BatchStatus;
+import com.apaarsetu.domain.enums.FlagResolution;
+import com.apaarsetu.domain.enums.FlagSeverity;
+import com.apaarsetu.domain.enums.FlagStatus;
+import com.apaarsetu.domain.enums.RegionZone;
+import com.apaarsetu.domain.enums.ValidationStatus;
+import com.apaarsetu.dto.AnomalyDTO;
+import com.apaarsetu.dto.CapacityViolationDTO;
+import com.apaarsetu.dto.ComplianceOverviewDTO;
+import com.apaarsetu.dto.DossierDTO;
+import com.apaarsetu.dto.FlagDetailDTO;
+import com.apaarsetu.dto.FlagResolveDTO;
+import com.apaarsetu.dto.InstitutionDashboardDTO;
+import com.apaarsetu.dto.InstitutionDiscrepancyRankDTO;
+import com.apaarsetu.dto.InstitutionResponseDTO;
+import com.apaarsetu.dto.NationalDashboardDTO;
+import com.apaarsetu.dto.OfficerDashboardDTO;
+import com.apaarsetu.dto.ProgramCapacityProgressDTO;
+import com.apaarsetu.repository.AuditLogRepository;
+import com.apaarsetu.repository.ComplianceNoticeRepository;
+import com.apaarsetu.repository.FlagRepository;
+import com.apaarsetu.repository.InstitutionRepository;
+import com.apaarsetu.repository.StudentRepository;
+import com.apaarsetu.repository.UploadBatchRepository;
 import com.apaarsetu.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +47,11 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * ============================================================================
@@ -53,9 +81,7 @@ public class DashboardService {
     private final FlagRepository flagRepository;
     private final AuditLogRepository auditLogRepository;
     private final UploadBatchRepository uploadBatchRepository;
-    private final RegulatoryInquiryRepository inquiryRepository;
     private final ComplianceNoticeRepository noticeRepository;
-    private final CommendationRepository commendationRepository;
     private final GridFsStorageService gridFsStorageService;
     private final AuditService auditService;
 

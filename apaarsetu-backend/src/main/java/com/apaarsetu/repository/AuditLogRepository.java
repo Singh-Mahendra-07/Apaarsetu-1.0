@@ -30,9 +30,9 @@ import java.util.List;
 public interface AuditLogRepository extends MongoRepository<AuditLog, String> {
     Page<AuditLog> findAllByOrderByTimestampDesc(Pageable pageable);
 
-    @Query("{ $or: [ { 'target.targetId': ?0 }, { 'target.documentId': ?0 } ] }")
+    @Query("{ $or: [ { 'target.target_id': ?0 }, { 'target.document_id': ?0 }, { 'target.targetId': ?0 }, { 'target.documentId': ?0 } ] }")
     List<AuditLog> findByTargetId(String targetId);
 
-    @Query("{ $or: [ { 'target.targetId': ?0 }, { 'target.documentId': ?0 } ] }")
+    @Query("{ $or: [ { 'target.target_id': ?0 }, { 'target.document_id': ?0 }, { 'target.targetId': ?0 }, { 'target.documentId': ?0 } ] }")
     Page<AuditLog> findByTargetId(String targetId, Pageable pageable);
 }

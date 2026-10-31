@@ -1,11 +1,18 @@
-import React from 'react'
+"use client";
 
-function page() {
+import { Settings } from "lucide-react";
+import SubsystemPlaceholder from "@/components/layout/SubsystemPlaceholder";
+
+export default function VerifierSettingsPage() {
   return (
-    <div>
-      setting
-    </div>
-  )
+    <SubsystemPlaceholder
+      portalTitle="AuthDesk Verifier"
+      portalDashboardHref="/authorized-verifier"
+      subsystemTitle="Security Webhooks & Verification API Keys"
+      description="Configure real-time verification callback webhooks, automated verification notification endpoints, and security session timeout parameters."
+      icon={Settings}
+      backendEndpoint="GET /api/v1/profile"
+      plannedRelease="Agency Webhook & API Key Suite"
+    />
+  );
 }
-
-export default page

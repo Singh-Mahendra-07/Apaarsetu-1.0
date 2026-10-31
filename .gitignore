@@ -1,17 +1,43 @@
-.env
-.env.*
-*.local
-*.pem
-*.key
-secrets/
-credentials/
-config/secret.*
-node_modules/
-dist/
-build/
-.DS_Store
-**/target/
-*.tsbuildinfo
+# Environment secrets
 .env
 .env.*
 !.env.example
+!.env.production.example
+
+# Frontend dependencies and builds
+apaarsetufrontend/node_modules/
+apaarsetufrontend/.next/
+apaarsetufrontend/out/
+apaarsetufrontend/dist/
+apaarsetufrontend/tsconfig.tsbuildinfo
+
+# Backend builds
+apaarsetu-backend/target/
+apaarsetu-backend/build/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Private keys
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local databases
+*.sqlite
+*.sqlite3
+*.db

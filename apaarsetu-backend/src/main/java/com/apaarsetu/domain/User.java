@@ -48,9 +48,6 @@ public class User {
     @com.fasterxml.jackson.annotation.JsonIgnore
     private String passwordHash;
 
-    @com.fasterxml.jackson.annotation.JsonIgnore
-    private String secondaryPasswordHash;
-
     private String fullName;
 
     private UserRole role;

@@ -32,7 +32,8 @@ import java.util.Optional;
  * Component: AuthService (class)
  *
  * REASON & ARCHITECTURAL PURPOSE:
- * Orchestrates user authentication, password validation, JWT issuance, TOTP multi-factor verification, and session lifecycle.
+ * Orchestrates user authentication, password validation, JWT issuance, TOTP
+ * multi-factor verification, and session lifecycle.
  *
  * WORKING & FUNCTIONAL FLOW:
  * 1. Verifies credentials via Spring AuthenticationManager and BCrypt.
@@ -63,14 +64,14 @@ public class AuthService {
                         .orElseThrow(() -> new UnauthorizedException("Invalid email or password")));
 
         if (user.getStatus() == UserStatus.LOCKED) {
-            throw new ForbiddenException("Account locked due to 5 consecutive failed login attempts. Contact an administrator to unlock.");
+            throw new ForbiddenException(
+                    "Account locked due to 5 consecutive failed login attempts. Contact an administrator to unlock.");
         }
         if (user.getStatus() == UserStatus.SUSPENDED) {
             throw new ForbiddenException("Account is currently suspended. Access denied.");
         }
 
-        boolean matches = passwordEncoder.matches(request.getPassword(), user.getPasswordHash())
-                || (user.getSecondaryPasswordHash() != null && passwordEncoder.matches(request.getPassword(), user.getSecondaryPasswordHash()));
+        boolean matches = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
 
         if (!matches) {
             int failedAttempts = user.getFailedLoginAttempts() + 1;
@@ -158,28 +159,32 @@ public class AuthService {
             userRepository.save(user);
         }
 
-        Optional<Long> verifiedStep = totpService.verifyCode(rawSecret, request.getOtpCode(), user.getLastTotpTimeStep());
+        Optional<Long> verifiedStep = totpService.verifyCode(rawSecret, request.getOtpCode(),
+                user.getLastTotpTimeStep());
         if (verifiedStep.isEmpty()) {
-            throw new org.springframework.security.authentication.BadCredentialsException("Invalid or expired 6-digit TOTP verification code");
+            throw new org.springframework.security.authentication.BadCredentialsException(
+                    "Invalid or expired 6-digit TOTP verification code");
         }
 
         // Database-Level Atomic TOTP Replay Prevention (Fix TOCTOU Race Condition)
         org.springframework.data.mongodb.core.query.Query atomicQuery = new org.springframework.data.mongodb.core.query.Query(
                 org.springframework.data.mongodb.core.query.Criteria.where("_id").is(user.getId())
                         .orOperator(
-                                org.springframework.data.mongodb.core.query.Criteria.where("lastTotpTimeStep").lt(verifiedStep.get()),
-                                org.springframework.data.mongodb.core.query.Criteria.where("lastTotpTimeStep").is(null)
-                        )
-        );
+                                org.springframework.data.mongodb.core.query.Criteria.where("lastTotpTimeStep")
+                                        .lt(verifiedStep.get()),
+                                org.springframework.data.mongodb.core.query.Criteria.where("lastTotpTimeStep")
+                                        .is(null)));
         org.springframework.data.mongodb.core.query.Update atomicUpdate = new org.springframework.data.mongodb.core.query.Update()
                 .set("lastTotpTimeStep", verifiedStep.get())
                 .set("lastLogin", Instant.now());
-        org.springframework.data.mongodb.core.FindAndModifyOptions options = org.springframework.data.mongodb.core.FindAndModifyOptions.options().returnNew(true);
+        org.springframework.data.mongodb.core.FindAndModifyOptions options = org.springframework.data.mongodb.core.FindAndModifyOptions
+                .options().returnNew(true);
 
         User updatedUser = mongoTemplate.findAndModify(atomicQuery, atomicUpdate, options, User.class);
         if (updatedUser == null) {
             log.warn("Atomic TOTP replay detected for user '{}' on step {}", user.getEmail(), verifiedStep.get());
-            throw new org.springframework.security.authentication.BadCredentialsException("TOTP code has already been used");
+            throw new org.springframework.security.authentication.BadCredentialsException(
+                    "TOTP code has already been used");
         }
         user = updatedUser;
 
@@ -270,7 +275,8 @@ public class AuthService {
     }
 
     public void logout(String token) {
-        if (token == null || token.isBlank()) return;
+        if (token == null || token.isBlank())
+            return;
         try {
             String tokenHash = jwtTokenProvider.hashToken(token);
             Claims claims = jwtTokenProvider.parseClaims(token);
@@ -337,11 +343,13 @@ public class AuthService {
                 .build();
     }
 
-    public LoginResponse resetFirstTimePassword(UserPrincipal principal, FirstTimePasswordResetRequest request, String clientIp, String userAgent) {
+    public LoginResponse resetFirstTimePassword(UserPrincipal principal, FirstTimePasswordResetRequest request,
+            String clientIp, String userAgent) {
         return resetFirstTimePassword(principal, request, null, clientIp, userAgent);
     }
 
-    public LoginResponse resetFirstTimePassword(UserPrincipal principal, FirstTimePasswordResetRequest request, String oldToken, String clientIp, String userAgent) {
+    public LoginResponse resetFirstTimePassword(UserPrincipal principal, FirstTimePasswordResetRequest request,
+            String oldToken, String clientIp, String userAgent) {
         if (principal == null || principal.getId() == null) {
             throw new UnauthorizedException("Authentication required to reset password");
         }
@@ -354,27 +362,30 @@ public class AuthService {
             throw new IllegalArgumentException("New password and confirm password do not match");
         }
 
-        // Verify that the new password is not identical to the current temporary password
+        // Verify that the new password is not identical to the current temporary
+        // password
         if (passwordEncoder.matches(request.getNewPassword(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("New password cannot be identical to the temporary password. Please choose a new permanent password.");
+            throw new IllegalArgumentException(
+                    "New password cannot be identical to the temporary password. Please choose a new permanent password.");
         }
 
-        // Hash new password and permanently destroy the one-time temporary password
+        // Hash new password and update user credentials
         String newHash = passwordEncoder.encode(request.getNewPassword());
         user.setPasswordHash(newHash);
-        user.setSecondaryPasswordHash(null);
         user.setRequiresPasswordChange(false);
         user.setMustChangePassword(false);
         user.setUpdatedAt(Instant.now());
         userRepository.save(user);
 
-        // Permanently revoke the old temporary access token so it can never be used again
+        // Permanently revoke the old temporary access token so it can never be used
+        // again
         if (oldToken != null && !oldToken.isBlank()) {
             logout(oldToken);
             log.info("Revoked temporary access token for user '{}' upon password change", user.getEmail());
         }
 
-        log.info("First-time temporary password resolved and permanent password established for user '{}'", user.getEmail());
+        log.info("First-time temporary password resolved and permanent password established for user '{}'",
+                user.getEmail());
 
         auditService.logAsync("FIRST_TIME_PASSWORD_RESET", user.getId(), user.getEmail(), user.getRole().name(),
                 user.getInstitutionId(), "USER", user.getId(), user.getId(), null,

@@ -871,129 +871,6 @@ type Institution = {
   programs: Program[];
 };
 
-const NO_QUOTAS: Quotas = {
-  ews: 0,
-  nri: 0,
-  tfw: 0,
-  pmsss: 0,
-  ocifn: 0,
-};
-
-const NIAT = "National Institute of Advanced Technology";
-
-const SAMPLE: Institution[] = [
-  {
-    id: "i1",
-    aicteId: "AICTE-INST-1001",
-    name: "Delhi Institute of Technology & Management",
-    category: "ENGINEERING",
-    zone: "NORTH",
-    state: "Delhi",
-    city: "New Delhi",
-    affiliation: "Delhi Technological University",
-    status: "APPROVED",
-    programs: [
-      {
-        code: "CS",
-        name: "B.Tech Computer Science (CS)",
-        level: "UG",
-        intake: 120,
-        quotas: {
-          ews: 12,
-          nri: 6,
-          tfw: 6,
-          pmsss: 2,
-          ocifn: 0,
-        },
-      },
-    ],
-  },
-  {
-    id: "i2",
-    aicteId: "AICTE-INST-2002",
-    name: "Bengaluru Premier Business Academy",
-    category: "PGDM",
-    zone: "SOUTH",
-    state: "Karnataka",
-    city: "Bengaluru",
-    affiliation: "AICTE Central",
-    status: "APPROVED",
-    programs: [
-      {
-        code: "PGDM",
-        name: "PGDM (Management)",
-        level: "PG",
-        intake: 60,
-        quotas: {
-          ...NO_QUOTAS,
-          ews: 6,
-          nri: 3,
-        },
-      },
-    ],
-  },
-  {
-    id: "i3",
-    aicteId: "AICTE-TEST-1950",
-    name: NIAT,
-    category: "ENGINEERING",
-    zone: "NORTH",
-    state: "Delhi",
-    city: "New Delhi",
-    affiliation: "AICTE Central",
-    status: "APPROVED",
-    programs: [],
-  },
-  {
-    id: "i4",
-    aicteId: "AICTE-TEST-3063",
-    name: `${NIAT} (Updated)`,
-    category: "ENGINEERING",
-    zone: "NORTH",
-    state: "Delhi",
-    city: "New Delhi",
-    affiliation: "AICTE Central",
-    status: "APPROVED",
-    programs: [],
-  },
-  {
-    id: "i5",
-    aicteId: "AICTE-TEST-5412",
-    name: `${NIAT} (Updated)`,
-    category: "ENGINEERING",
-    zone: "NORTH",
-    state: "Delhi",
-    city: "New Delhi",
-    affiliation: "AICTE Central",
-    status: "APPROVED",
-    programs: [],
-  },
-  {
-    id: "i6",
-    aicteId: "AICTE-TEST-5014",
-    name: `${NIAT} (Updated)`,
-    category: "ENGINEERING",
-    zone: "NORTH",
-    state: "Delhi",
-    city: "New Delhi",
-    affiliation: "AICTE Central",
-    status: "APPROVED",
-    programs: [],
-  },
-  {
-    id: "i7",
-    aicteId: "AICTE-TEST-7782",
-    name: `${NIAT} (Updated)`,
-    category: "ENGINEERING",
-    zone: "NORTH",
-    state: "Delhi",
-    city: "New Delhi",
-    affiliation: "AICTE Central",
-    status: "APPROVED",
-    programs: [],
-  },
-];
-
 const ZONES = ["NORTH", "SOUTH", "WEST", "EAST", "CENTRAL"];
 
 const STATUS_CLS: Record<
@@ -1165,11 +1042,11 @@ export default function InstitutionsPage() {
       prev.map((i) =>
         i.id === institution.id
           ? {
-              ...i,
-              programs: i.programs.map((p) =>
-                p.code === code ? { ...p, intake, quotas } : p
-              ),
-            }
+            ...i,
+            programs: i.programs.map((p) =>
+              p.code === code ? { ...p, intake, quotas } : p
+            ),
+          }
           : i
       )
     );
@@ -1218,16 +1095,14 @@ export default function InstitutionsPage() {
         </div>
 
         <span
-          className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-            apiUp
+          className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${apiUp
               ? "border-emerald-200 bg-emerald-50 text-emerald-700"
               : "border-red-200 bg-red-50 text-red-700"
-          }`}
+            }`}
         >
           <span
-            className={`h-2 w-2 rounded-full ${
-              apiUp ? "bg-emerald-500" : "bg-red-500"
-            }`}
+            className={`h-2 w-2 rounded-full ${apiUp ? "bg-emerald-500" : "bg-red-500"
+              }`}
           />
           {apiUp
             ? "API Connected (Port 8081)"
@@ -1371,11 +1246,10 @@ export default function InstitutionsPage() {
                     <tr
                       key={institution.id}
                       // Clicking the row only highlights it.
-                      className={`border-t border-slate-200 ${
-                        institution.id === selectedId
+                      className={`border-t border-slate-200 ${institution.id === selectedId
                           ? "bg-indigo-50"
                           : "hover:bg-slate-50"
-                      }`}
+                        }`}
                     >
                       <td className="max-w-[110px] px-4 py-3 font-medium text-indigo-700">
                         {institution.aicteId}
@@ -1492,11 +1366,10 @@ export default function InstitutionsPage() {
                       key={status}
                       onClick={() => changeStatus(selected, status)}
                       aria-pressed={selected.status === status}
-                      className={`rounded-md border px-2 py-1.5 text-xs font-semibold ${
-                        selected.status === status
+                      className={`rounded-md border px-2 py-1.5 text-xs font-semibold ${selected.status === status
                           ? STATUS_CLS[status].active
                           : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
-                      }`}
+                        }`}
                     >
                       {status}
                     </button>
@@ -1670,20 +1543,20 @@ function RegisterModal({
       status: "APPROVED",
       programs: hasProgram
         ? [
-            {
-              code: f.code.trim(),
-              name: f.programName.trim(),
-              level: f.level,
-              intake: n(f.intake),
-              quotas: {
-                ews: n(f.ews),
-                nri: n(f.nri),
-                tfw: n(f.tfw),
-                pmsss: n(f.pmsss),
-                ocifn: n(f.ocifn),
-              },
+          {
+            code: f.code.trim(),
+            name: f.programName.trim(),
+            level: f.level,
+            intake: n(f.intake),
+            quotas: {
+              ews: n(f.ews),
+              nri: n(f.nri),
+              tfw: n(f.tfw),
+              pmsss: n(f.pmsss),
+              ocifn: n(f.ocifn),
             },
-          ]
+          },
+        ]
         : [],
     });
   };
@@ -2043,9 +1916,8 @@ function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`w-full ${
-          wide ? "max-w-3xl" : "max-w-md"
-        } rounded-2xl bg-white p-6 shadow-xl`}
+        className={`w-full ${wide ? "max-w-3xl" : "max-w-md"
+          } rounded-2xl bg-white p-6 shadow-xl`}
       >
         <div className="mb-4 flex items-start justify-between">
           <h3 className="text-lg font-bold">{title}</h3>

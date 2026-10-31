@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import {
   Building2,
-  CheckCircle2,
   GraduationCap,
   Loader2,
   Mail,
@@ -14,7 +12,6 @@ import {
   ShieldCheck,
   User,
   AlertCircle,
-  FileText,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { institutionApi, apiClient } from "@/lib/api";

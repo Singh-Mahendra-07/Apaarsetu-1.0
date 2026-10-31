@@ -3,8 +3,8 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 
 export const metadata: Metadata = {
-  title: "apaarSetu | Data at one place",
-  description: "APAAR-based National Student Data Management & Verification System for AICTE",
+  title: "APAARSetu — AICTE National Student Registry & APAAR Verification Platform",
+  description: "Unified National APAAR Data Management & Real-time Verification Infrastructure for AICTE & Ministry of Education",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="w-full min-h-screen bg-linear-to-b from-blue-300 to-white">
+      <body className="w-full min-h-screen bg-slate-50 text-slate-900 antialiased">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

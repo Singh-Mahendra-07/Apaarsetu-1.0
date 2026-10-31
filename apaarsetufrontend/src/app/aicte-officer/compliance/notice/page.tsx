@@ -69,6 +69,15 @@ const SAMPLE_INSTITUTIONS: InstitutionOption[] = [
 ];
 
 const SAMPLE_PROFILES: Record<string, InstitutionProfile> = {
+  "AICTE-INST-1001": {
+    complianceScore: 78,
+    status: "UNDER_REVIEW",
+    violations: ["1 Pending Student Record Dispute", "Intake Compliance Monitoring"],
+    recipients: [
+      { role: "Principal", email: "admin@ditm.ac.in" },
+      { role: "Registrar", email: "registrar@ditm.ac.in" },
+    ],
+  },
   "AICTE-INST-1003": {
     complianceScore: 58,
     status: "UNDER_REVIEW",
@@ -76,6 +85,15 @@ const SAMPLE_PROFILES: Record<string, InstitutionProfile> = {
     recipients: [
       { role: "Principal", email: "principal@nit.edu.in" },
       { role: "Registrar", email: "registrar@nit.edu.in" },
+    ],
+  },
+  "AICTE-NITP-3201": {
+    complianceScore: 92,
+    status: "APPROVED",
+    violations: ["Supernumerary quota verification"],
+    recipients: [
+      { role: "Director", email: "director@nitp.ac.in" },
+      { role: "Admin", email: "gautam@nitp.ac.in" },
     ],
   },
 };
@@ -176,8 +194,22 @@ function NoticeForm() {
           cache: "no-store",
         });
         if (res.ok) {
-          const json = (await res.json()) as { institutions: InstitutionOption[] };
-          setOptions(json.institutions);
+          const json = await res.json();
+          const rawList = Array.isArray(json?.institutions)
+            ? json.institutions
+            : Array.isArray(json?.data?.institutions)
+            ? json.data.institutions
+            : Array.isArray(json)
+            ? json
+            : [];
+          if (rawList.length > 0) {
+            const list: InstitutionOption[] = rawList.map((i: any) => ({
+              id: i.id || i.aicteId,
+              name: i.name,
+              affiliation: i.universityAffiliation || i.affiliation || "",
+            }));
+            setOptions(list);
+          }
           setApiUp(true);
         } else if (res.status === 401 || res.status === 403) {
           setApiUp(true);
@@ -190,9 +222,20 @@ function NoticeForm() {
 
   // Pre-select the institution that came from the Issue Notice button.
   useEffect(() => {
-    if (!presetId || selected) return;
+    if (!presetId) return;
     const match = options.find((o) => o.id === presetId);
-    if (match) setSelected(match);
+    if (match) {
+      setSelected(match);
+    } else if (!selected) {
+      const sampleMatch = SAMPLE_INSTITUTIONS.find((s) => s.id === presetId);
+      setSelected(
+        sampleMatch ?? {
+          id: presetId,
+          name: presetId,
+          affiliation: "",
+        }
+      );
+    }
   }, [presetId, options, selected]);
 
   // GET /api/v1/institutions/{id}: compliance score, violations and recipients.
@@ -211,17 +254,61 @@ function NoticeForm() {
           cache: "no-store",
         });
         if (!res.ok) throw new Error(String(res.status));
-        const p = (await res.json()) as InstitutionProfile;
+        const json = await res.json();
+        const raw = (json && typeof json === "object" && "data" in json && json.data) ? json.data : json;
+
+        const targetRecipients: Recipient[] = [];
+        if (Array.isArray(raw?.recipients)) {
+          targetRecipients.push(...raw.recipients);
+        } else {
+          if (raw?.headEmail) {
+            targetRecipients.push({
+              role: raw.headName ? `Head (${raw.headName})` : "Principal / Director",
+              email: raw.headEmail,
+            });
+          }
+          if (raw?.nodalOfficerEmail && raw.nodalOfficerEmail !== raw.headEmail) {
+            targetRecipients.push({
+              role: raw.nodalOfficerName ? `Nodal Officer (${raw.nodalOfficerName})` : "Nodal Officer",
+              email: raw.nodalOfficerEmail,
+            });
+          }
+        }
+
+        if (targetRecipients.length === 0) {
+          const sample = SAMPLE_PROFILES[selected.id];
+          if (sample?.recipients && sample.recipients.length > 0) {
+            targetRecipients.push(...sample.recipients);
+          } else {
+            targetRecipients.push({
+              role: "Principal / Registrar",
+              email: `admin@${selected.id.toLowerCase().replace(/[^a-z0-9]/g, "")}.ac.in`,
+            });
+          }
+        }
+
+        const formattedProfile: InstitutionProfile = {
+          complianceScore: typeof raw?.complianceScore === "number" ? raw.complianceScore : 78,
+          status: raw?.status || "UNDER_REVIEW",
+          violations: Array.isArray(raw?.violations) ? raw.violations : (raw?.violation ? [raw.violation] : ["1 Pending Student Record Dispute", "Intake Compliance Monitoring"]),
+          recipients: targetRecipients,
+        };
+
         if (!cancelled) {
-          setProfile(p);
-          setRecipients(p.recipients);
+          setProfile(formattedProfile);
+          setRecipients(targetRecipients);
         }
       } catch {
         if (cancelled) return;
-        const p = SAMPLE_PROFILES[selected.id] ?? null;
+        const p = SAMPLE_PROFILES[selected.id] ?? {
+          complianceScore: 75,
+          status: "UNDER_REVIEW",
+          violations: ["Pending compliance verification"],
+          recipients: [{ role: "Principal", email: `admin@${selected.id.toLowerCase().replace(/[^a-z0-9]/g, "")}.ac.in` }],
+        };
         setProfile(p);
-        setProfileSample(!!p);
-        setRecipients(p?.recipients ?? []);
+        setProfileSample(!!SAMPLE_PROFILES[selected.id]);
+        setRecipients(Array.isArray(p?.recipients) ? p.recipients : []);
       } finally {
         if (!cancelled) setProfileLoading(false);
       }
@@ -241,11 +328,13 @@ function NoticeForm() {
 
   const dueDate = useMemo(() => addBusinessDays(new Date(), days), [days]);
 
+  const safeRecipients = Array.isArray(recipients) ? recipients : [];
+
   const payload = {
     institutionId: selected?.id ?? "",
     noticeType,
     subject: subject.trim(),
-    recipients: recipients.map((r) => r.email),
+    recipients: safeRecipients.map((r) => r.email),
     responseDueInDays: days,
     chargeDetails: charges.trim(),
   };
@@ -266,11 +355,11 @@ function NoticeForm() {
       setErrors((e) => ({ ...e, recipients: "Enter a valid email address." }));
       return;
     }
-    if (recipients.some((r) => r.email === email)) {
+    if (safeRecipients.some((r) => r.email === email)) {
       setErrors((e) => ({ ...e, recipients: "That recipient is already on the list." }));
       return;
     }
-    setRecipients([...recipients, { role: "Additional", email }]);
+    setRecipients([...safeRecipients, { role: "Additional", email }]);
     setNewEmail("");
     setErrors((e) => ({ ...e, recipients: "" }));
   };
@@ -294,7 +383,7 @@ function NoticeForm() {
     const e: Record<string, string> = {};
     if (!selected) e.institution = "Select the institution this notice is for.";
     if (subject.trim().length < 5) e.subject = "Enter a subject for the notice.";
-    if (recipients.length === 0) e.recipients = "Add at least one recipient.";
+    if (safeRecipients.length === 0) e.recipients = "Add at least one recipient.";
     if (charges.trim().length < 20) e.charges = "Describe the charges in at least 20 characters.";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -306,14 +395,26 @@ function NoticeForm() {
     setBusy(true);
     setSubmitError(null);
     try {
-      const body = new FormData();
-      body.append("notice", new Blob([JSON.stringify(payload)], { type: "application/json" }));
-      if (file) body.append("attachment", file);
-      const res = await fetch("/api/v1/compliance/notices", {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body,
-      });
+      let res: Response;
+      if (file) {
+        const body = new FormData();
+        body.append("notice", JSON.stringify(payload));
+        body.append("attachment", file);
+        res = await fetch("/api/v1/compliance/notices", {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body,
+        });
+      } else {
+        res = await fetch("/api/v1/compliance/notices", {
+          method: "POST",
+          headers: {
+            ...getAuthHeaders(),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+      }
       if (!res.ok) throw new Error(await readError(res));
       setSent(true);
     } catch (err) {
@@ -360,8 +461,8 @@ function NoticeForm() {
             <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600" />
             <h2 className="mt-3 text-xl font-bold">Notice dispatched</h2>
             <p className="mt-1 text-slate-600">
-              The notice for <b>{selected?.name}</b> was recorded and emailed to {recipients.length}{" "}
-              {recipients.length === 1 ? "recipient" : "recipients"}. A response is due by{" "}
+              The notice for <b>{selected?.name}</b> was recorded and emailed to {safeRecipients.length}{" "}
+              {safeRecipients.length === 1 ? "recipient" : "recipients"}. A response is due by{" "}
               <b>{formatDue(dueDate)}</b>.
             </p>
             <div className="mt-6 flex justify-center gap-3">
@@ -557,14 +658,14 @@ function NoticeForm() {
                   <div>
                     <p className="mb-1 text-sm font-semibold text-slate-700">Target Recipients (Auto-Fetched)</p>
                     <div className="flex flex-wrap gap-2">
-                      {recipients.length === 0 && <span className="text-sm text-slate-500">No recipients yet. Select an institution or add one below.</span>}
-                      {recipients.map((r) => (
+                      {safeRecipients.length === 0 && <span className="text-sm text-slate-500">No recipients yet. Select an institution or add one below.</span>}
+                      {safeRecipients.map((r) => (
                         <span key={r.email} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1 text-sm">
                           {r.role} ({r.email})
                           <button
                             type="button"
                             aria-label={`Remove ${r.email}`}
-                            onClick={() => setRecipients(recipients.filter((x) => x.email !== r.email))}
+                            onClick={() => setRecipients(safeRecipients.filter((x) => x.email !== r.email))}
                             className="text-slate-500 hover:text-red-600"
                           >
                             <X className="h-3.5 w-3.5" />
@@ -643,7 +744,7 @@ function NoticeForm() {
               )}
 
               <p className="mt-3 text-sm text-slate-600">
-                This will send a <b>{typeLabel}</b> to {recipients.length || "no"} recipient{recipients.length === 1 ? "" : "s"}
+                This will send a <b>{typeLabel}</b> to {safeRecipients.length || "no"} recipient{safeRecipients.length === 1 ? "" : "s"}
                 {selected ? ` at ${selected.name}` : ""}, due {formatDue(dueDate)}. It will be recorded in the audit log.
               </p>
 

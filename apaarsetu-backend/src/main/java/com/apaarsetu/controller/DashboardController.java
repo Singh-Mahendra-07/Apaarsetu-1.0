@@ -2,13 +2,21 @@ package com.apaarsetu.controller;
 
 import com.apaarsetu.common.dto.ApiResponse;
 import com.apaarsetu.common.dto.PagedResponse;
+import com.apaarsetu.common.exception.ForbiddenException;
+import com.apaarsetu.common.exception.ResourceNotFoundException;
 import com.apaarsetu.domain.AuditLog;
+import com.apaarsetu.domain.Student;
 import com.apaarsetu.domain.enums.FlagSeverity;
-import com.apaarsetu.dto.*;
+import com.apaarsetu.dto.AnomalyDTO;
+import com.apaarsetu.dto.CapacityViolationDTO;
+import com.apaarsetu.dto.FlagDetailDTO;
+import com.apaarsetu.dto.FlagResolveDTO;
+import com.apaarsetu.dto.InstitutionDashboardDTO;
+import com.apaarsetu.dto.NationalDashboardDTO;
 import com.apaarsetu.repository.AuditLogRepository;
+import com.apaarsetu.repository.StudentRepository;
 import com.apaarsetu.security.UserPrincipal;
 import com.apaarsetu.service.DashboardService;
-import com.apaarsetu.service.GridFsStorageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +34,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,7 +61,7 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
     private final AuditLogRepository auditLogRepository;
-    private final GridFsStorageService gridFsStorageService;
+    private final StudentRepository studentRepository;
 
     @GetMapping("/dashboard/national")
     @PreAuthorize("hasAnyRole('AICTE_ADMIN', 'AICTE_OFFICER')")
@@ -73,12 +80,24 @@ public class DashboardController {
             @RequestParam(required = false) String academicYear,
             @AuthenticationPrincipal UserPrincipal principal) {
         String instId = institutionId;
-        if ((instId == null || instId.isBlank()) && principal != null && principal.getInstitutionId() != null) {
-            instId = principal.getInstitutionId();
+        boolean isNationalStaff = principal != null && principal.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_AICTE_ADMIN") || a.getAuthority().equals("ROLE_AICTE_OFFICER"));
+
+        if (!isNationalStaff) {
+            String userInstId = principal != null ? principal.getInstitutionId() : null;
+            if (userInstId == null || userInstId.isBlank()) {
+                throw new ForbiddenException("Access denied: User is not associated with an institution");
+            }
+            if (instId != null && !instId.isBlank() && !instId.equalsIgnoreCase(userInstId)) {
+                throw new ForbiddenException("Access denied: Cross-tenant access to foreign institution dashboard is prohibited");
+            }
+            instId = userInstId;
+        } else {
+            if (instId == null || instId.isBlank()) {
+                instId = principal.getInstitutionId() != null ? principal.getInstitutionId() : "AICTE-INST-1001";
+            }
         }
-        if (instId == null || instId.isBlank()) {
-            instId = "AICTE-INST-1001";
-        }
+
         InstitutionDashboardDTO dto = dashboardService.getInstitutionDashboard(instId, academicYear);
         return ResponseEntity.ok(ApiResponse.success(dto));
     }
@@ -161,7 +180,7 @@ public class DashboardController {
 
     @GetMapping("/audit-logs")
     @PreAuthorize("hasRole('AICTE_ADMIN')")
-    public ResponseEntity<?> getAuditLogs(
+    public ResponseEntity<Object> getAuditLogs(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
             @PageableDefault(size = 20, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -178,7 +197,21 @@ public class DashboardController {
     @PreAuthorize("hasAnyRole('AICTE_ADMIN', 'AICTE_OFFICER', 'INSTITUTION_ADMIN')")
     public ResponseEntity<ApiResponse<PagedResponse<AuditLog>>> getStudentAuditLogs(
             @PathVariable String studentId,
-            @PageableDefault(size = 20, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        boolean isNationalStaff = principal != null && principal.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_AICTE_ADMIN") || a.getAuthority().equals("ROLE_AICTE_OFFICER"));
+
+        if (!isNationalStaff) {
+            Student student = studentRepository.findById(studentId)
+                    .or(() -> studentRepository.findByApaarId(studentId))
+                    .orElseThrow(() -> new ResourceNotFoundException("Student record not found"));
+            String userInstId = principal != null ? principal.getInstitutionId() : null;
+            if (userInstId == null || !userInstId.equalsIgnoreCase(student.getInstitutionId())) {
+                throw new ForbiddenException("Access denied: Cross-tenant access to student audit logs is prohibited");
+            }
+        }
+
         Page<AuditLog> page = auditLogRepository.findByTargetId(studentId, pageable);
         return ResponseEntity.ok(ApiResponse.success(PagedResponse.fromPage(page)));
     }

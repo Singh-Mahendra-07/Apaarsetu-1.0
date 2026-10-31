@@ -56,6 +56,9 @@ public class MongoIndexConfig {
 
             safeEnsureIndex(studentOps, new Index().on("apaar_id", Sort.Direction.ASC).named("idx_students_apaar_id"), "Students APAAR index");
             safeEnsureIndex(studentOps, new Index().on("personal_info.full_name", Sort.Direction.ASC).named("idx_students_full_name"), "Students Full Name index");
+            safeEnsureIndex(studentOps, new Index().on("batch_id", Sort.Direction.ASC).named("idx_students_batch_id"), "Students Batch ID index");
+            safeEnsureIndex(studentOps, new Index().on("institution_id", Sort.Direction.ASC).named("idx_students_institution_id"), "Students Institution ID index");
+            safeEnsureIndex(studentOps, new Index().on("institution_id", Sort.Direction.ASC).on("program_code", Sort.Direction.ASC).on("academic_year", Sort.Direction.ASC).named("idx_students_inst_prog_year"), "Students Inst Prog Year compound index");
 
             // Partial unique index for nationwide unique ADMITTED_ACTIVE enrollment
             Document partialKeys = new Document("apaar_id", 1).append("academic_year", 1);
@@ -87,11 +90,13 @@ public class MongoIndexConfig {
             // 5. Verification Tokens TTL
             IndexOperations verifyOps = mongoTemplate.indexOps("verification_tokens");
             safeEnsureIndex(verifyOps, new Index().on("token_hash", Sort.Direction.ASC).unique().named("uidx_verify_token_hash"), "Verification tokens hash index");
+            safeEnsureIndex(verifyOps, new Index().on("certificate_id", Sort.Direction.ASC).named("idx_verify_cert_id"), "Verification tokens certificate ID index");
             safeEnsureIndex(verifyOps, new Index().on("expires_at", Sort.Direction.ASC).expire(Duration.ZERO).named("ttl_verify_tokens"), "Verification tokens TTL index");
 
             // 6. Audit Logs
             IndexOperations auditOps = mongoTemplate.indexOps("audit_logs");
             safeEnsureIndex(auditOps, new Index().on("timestamp", Sort.Direction.DESC).named("idx_audit_logs_timestamp"), "Audit logs timestamp index");
+            safeEnsureIndex(auditOps, new Index().on("target.target_id", Sort.Direction.ASC).named("idx_audit_target_id"), "Audit logs target ID index");
 
             // 7. Dispute Flags Indexes
             IndexOperations flagOps = mongoTemplate.indexOps("dispute_flags");
@@ -99,6 +104,7 @@ public class MongoIndexConfig {
             safeEnsureIndex(flagOps, new Index().on("student_id", Sort.Direction.ASC).named("idx_flags_student_id"), "Dispute flags student_id index");
             safeEnsureIndex(flagOps, new Index().on("status", Sort.Direction.ASC).named("idx_flags_status"), "Dispute flags status index");
             safeEnsureIndex(flagOps, new Index().on("severity", Sort.Direction.ASC).named("idx_flags_severity"), "Dispute flags severity index");
+            safeEnsureIndex(flagOps, new Index().on("status", Sort.Direction.ASC).on("severity", Sort.Direction.ASC).named("idx_flags_status_severity"), "Dispute flags status severity index");
             safeEnsureIndex(flagOps, new Index().on("primary_institution_id", Sort.Direction.ASC).named("idx_flags_primary_inst"), "Dispute flags primary inst index");
             safeEnsureIndex(flagOps, new Index().on("created_at", Sort.Direction.DESC).named("idx_flags_created_at"), "Dispute flags created_at index");
 
@@ -106,12 +112,30 @@ public class MongoIndexConfig {
             IndexOperations batchOps = mongoTemplate.indexOps("upload_batches");
             safeEnsureIndex(batchOps, new Index().on("institution_id", Sort.Direction.ASC).named("idx_batches_institution"), "Upload batches institution index");
             safeEnsureIndex(batchOps, new Index().on("status", Sort.Direction.ASC).named("idx_batches_status"), "Upload batches status index");
+            safeEnsureIndex(batchOps, new Index().on("institution_id", Sort.Direction.ASC).on("status", Sort.Direction.ASC).named("idx_batches_inst_status"), "Upload batches inst status index");
             safeEnsureIndex(batchOps, new Index().on("created_at", Sort.Direction.DESC).named("idx_batches_created_at"), "Upload batches created_at index");
 
             // 9. Compliance Notices Indexes
             IndexOperations noticeOps = mongoTemplate.indexOps("compliance_notices");
             safeEnsureIndex(noticeOps, new Index().on("institution_id", Sort.Direction.ASC).named("idx_notices_institution"), "Compliance notices institution index");
             safeEnsureIndex(noticeOps, new Index().on("status", Sort.Direction.ASC).named("idx_notices_status"), "Compliance notices status index");
+
+            // 10. Regulatory Inquiries
+            IndexOperations inquiryOps = mongoTemplate.indexOps("regulatory_inquiries");
+            safeEnsureIndex(inquiryOps, new Index().on("institution_id", Sort.Direction.ASC).named("idx_inquiries_institution"), "Inquiries institution index");
+
+            // 11. Verification Disputes
+            IndexOperations disputeOps = mongoTemplate.indexOps("verification_disputes");
+            safeEnsureIndex(disputeOps, new Index().on("apaar_id", Sort.Direction.ASC).named("idx_disputes_apaar"), "Disputes apaar index");
+            safeEnsureIndex(disputeOps, new Index().on("verifier_id", Sort.Direction.ASC).named("idx_disputes_verifier"), "Disputes verifier index");
+
+            // 12. Commendations
+            IndexOperations commendationOps = mongoTemplate.indexOps("commendations");
+            safeEnsureIndex(commendationOps, new Index().on("institution_id", Sort.Direction.ASC).named("idx_commendations_inst"), "Commendations institution index");
+
+            // 13. User Preferences
+            IndexOperations prefOps = mongoTemplate.indexOps("user_preferences");
+            safeEnsureIndex(prefOps, new Index().on("user_id", Sort.Direction.ASC).unique().named("uidx_user_pref_user_id"), "User preferences unique user_id index");
 
             log.info("MongoDB custom indexes verified and active.");
         } catch (Exception ex) {

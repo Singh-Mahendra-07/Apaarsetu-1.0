@@ -1,11 +1,18 @@
-import React from 'react'
+"use client";
 
-function page() {
+import { Users } from "lucide-react";
+import SubsystemPlaceholder from "@/components/layout/SubsystemPlaceholder";
+
+export default function InstitutionUserManagementPage() {
   return (
-    <div>
-      hey
-    </div>
-  )
+    <SubsystemPlaceholder
+      portalTitle="Institution Admin"
+      portalDashboardHref="/institution-admin"
+      subsystemTitle="College Operator Access & Staff Management"
+      description="Authorize, monitor, and revoke access for college registration staff and institution operators uploading student batches to the national portal."
+      icon={Users}
+      backendEndpoint="GET /api/v1/active/officials"
+      plannedRelease="College Staff Access Control Desk"
+    />
+  );
 }
-
-export default page

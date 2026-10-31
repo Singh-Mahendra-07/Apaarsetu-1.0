@@ -1,7 +1,6 @@
 // Red Team / SDET Automated Frontend Security Audit Script
 // Tests: NextAuth Boundary Enforcement, Cookie Role Spoofing, and Shadow Route Neutralization
 
-import http from 'http';
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081/api/v1';

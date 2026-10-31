@@ -202,21 +202,40 @@ public class OfficerComplianceController {
         return ResponseEntity.ok(ApiResponse.success("Regulatory inquiry created successfully with ID: " + inquiry.getId()));
     }
 
-    @PostMapping(value = "/compliance/notices", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/compliance/notices", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('AICTE_ADMIN', 'AICTE_OFFICER')")
-    public ResponseEntity<ApiResponse<ComplianceNotice>> createComplianceNotice(
+    public ResponseEntity<ApiResponse<ComplianceNotice>> createComplianceNoticeJson(
+            @RequestBody Map<String, Object> bodyJson,
+            @AuthenticationPrincipal UserPrincipal principal,
+            HttpServletRequest request) {
+        return processNotice(bodyJson != null ? bodyJson : Map.of(), null, principal, request);
+    }
+
+    @PostMapping(value = "/compliance/notices", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('AICTE_ADMIN', 'AICTE_OFFICER')")
+    public ResponseEntity<ApiResponse<ComplianceNotice>> createComplianceNoticeMultipart(
             @RequestPart(value = "notice", required = false) String noticeJson,
             @RequestPart(value = "attachment", required = false) MultipartFile attachment,
-            @RequestBody(required = false) Map<String, Object> bodyJson,
             @AuthenticationPrincipal UserPrincipal principal,
             HttpServletRequest request) {
         try {
-            Map<String, Object> data;
-            if (noticeJson != null && !noticeJson.isBlank()) {
-                data = objectMapper.readValue(noticeJson, Map.class);
-            } else if (bodyJson != null) {
-                data = bodyJson;
-            } else {
+            Map<String, Object> data = (noticeJson != null && !noticeJson.isBlank())
+                    ? objectMapper.readValue(noticeJson, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {})
+                    : Map.of();
+            return processNotice(data, attachment, principal, request);
+        } catch (Exception e) {
+            log.error("Failed to parse compliance notice multipart payload", e);
+            throw new RuntimeException("Could not create compliance notice: " + e.getMessage());
+        }
+    }
+
+    private ResponseEntity<ApiResponse<ComplianceNotice>> processNotice(
+            Map<String, Object> data,
+            MultipartFile attachment,
+            UserPrincipal principal,
+            HttpServletRequest request) {
+        try {
+            if (data == null || data.isEmpty()) {
                 throw new IllegalArgumentException("Notice payload is required");
             }
 
@@ -224,7 +243,13 @@ public class OfficerComplianceController {
             verifyInstitutionZone(instId, principal);
             String noticeType = (String) data.getOrDefault("noticeType", "SHOW_CAUSE");
             String subject = (String) data.getOrDefault("subject", "Notice of Compliance Investigation");
-            List<String> recipients = (List<String>) data.getOrDefault("recipients", List.of());
+            List<String> recipients = new java.util.ArrayList<>();
+            Object recObj = data.get("recipients");
+            if (recObj instanceof List<?> list) {
+                for (Object item : list) {
+                    if (item != null) recipients.add(item.toString());
+                }
+            }
             int days = data.get("responseDueInDays") != null ? Integer.parseInt(data.get("responseDueInDays").toString()) : 15;
             String charges = (String) data.get("chargeDetails");
 

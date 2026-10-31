@@ -79,7 +79,7 @@ export default function InstitutionOperatorSidebar() {
     try {
       await logout();
     } finally {
-      router.push("/officials-login");
+      router.push("/login");
     }
   };
 

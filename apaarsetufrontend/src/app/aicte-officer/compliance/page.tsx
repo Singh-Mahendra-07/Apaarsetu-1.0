@@ -33,18 +33,6 @@ type Summary = {
   activeNotices: number;
 };
 
-/* ------------------------------ Sample data ------------------------------ */
-// Used only if the API can't be reached.
-
-const SAMPLE_ROWS: Row[] = [
-  { id: "AICTE-INST-1003", name: "Northern Institute of Tech", affiliation: "Punjab Tech Univ", submission: "LATE", daysLate: 3, validationRatio: 74.2, intakeStatus: "OVER", overBy: 15, pendingDisputes: 2, overdueDisputes: 2, tier: 3, defects: "Overdue batch, 26% invalid records, +15 excess in MBA" },
-  { id: "AICTE-INST-1001", name: "Delhi Inst of Tech & Mgmt", affiliation: "Delhi Tech Univ", submission: "ON_TIME", validationRatio: 96.8, intakeStatus: "OVER", overBy: 16, pendingDisputes: 0, tier: 2, defects: "CSE-UG-101 exceeded regular intake ceiling" },
-  { id: "AICTE-INST-1002", name: "Apex College of Engineering", affiliation: "Autonomous", submission: "ON_TIME", validationRatio: 99.2, intakeStatus: "COMPLIANT", pendingDisputes: 0, tier: 1, defects: "Fully compliant across all 4 sanctioned programs" },
-  { id: "AICTE-INST-2002", name: "Bangalore Premier Business", affiliation: "Bangalore Univ", submission: "NOT_UPLOADED", validationRatio: 0, intakeStatus: "UNKNOWN", pendingDisputes: 0, tier: 3, defects: "Zero student records submitted for 2026-2027" },
-];
-
-const SAMPLE_SUMMARY: Summary = { cleanRatio: 92.4, onTime: 14, totalColleges: 17, intakeBreaches: 3, activeNotices: 4 };
-
 const TIER_META = {
   1: { label: "TIER 1", sub: "(Compliant)", dot: "bg-emerald-500" },
   2: { label: "TIER 2", sub: "(At Risk)", dot: "bg-amber-400" },
@@ -82,8 +70,6 @@ export default function ComplianceMonitorPage() {
   const [tierF, setTierF] = useState("ALL");
   const [defectF, setDefectF] = useState("ALL");
   const [query, setQuery] = useState("");
-
-  const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -99,9 +85,21 @@ export default function ComplianceMonitorPage() {
         cache: "no-store",
       });
       if (res.ok) {
-        const json = (await res.json()) as { rows: Row[]; summary: Summary };
-        setRows(json.rows);
-        setSummary(json.summary);
+        const json = await res.json();
+        const payload =
+          json && typeof json === "object" && "data" in json && json.data
+            ? (json.data as { rows?: Row[]; summary?: Summary })
+            : (json as { rows?: Row[]; summary?: Summary });
+
+        if (payload && Array.isArray(payload.rows)) {
+          setRows(payload.rows);
+        } else {
+          setRows([]);
+        }
+
+        if (payload && payload.summary) {
+          setSummary(payload.summary);
+        }
         setApiUp(true);
       } else if (res.status === 401 || res.status === 403) {
         setApiUp(true);
@@ -125,14 +123,16 @@ export default function ComplianceMonitorPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return rows.filter((r) => {
+    const safeRows = Array.isArray(rows) ? rows : [];
+    return safeRows.filter((r) => {
+      if (!r) return false;
       if (tierF === "WARN" && r.tier === 1) return false;
       if (["1", "2", "3"].includes(tierF) && r.tier !== Number(tierF)) return false;
       if (defectF === "LATE" && r.submission === "ON_TIME") return false;
       if (defectF === "LOW_VALIDATION" && r.validationRatio >= 90) return false;
       if (defectF === "OVER_INTAKE" && r.intakeStatus !== "OVER") return false;
       if (defectF === "DISPUTES" && !r.overdueDisputes) return false;
-      return !q || [r.id, r.name, r.affiliation].some((v) => v.toLowerCase().includes(q));
+      return !q || [r.id, r.name, r.affiliation].some((v) => (v || "").toLowerCase().includes(q));
     });
   }, [rows, tierF, defectF, query]);
 
@@ -164,10 +164,11 @@ export default function ComplianceMonitorPage() {
     URL.revokeObjectURL(url);
   };
 
-  const onTimePct = summary.totalColleges ? ((summary.onTime / summary.totalColleges) * 100).toFixed(1) : "0.0";
+  const safeSummary = summary || EMPTY_COMPLIANCE_SUMMARY;
+  const onTimePct = safeSummary.totalColleges ? ((safeSummary.onTime / safeSummary.totalColleges) * 100).toFixed(1) : "0.0";
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900" onClick={() => setMenuOpen(false)}>
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       {/* ------------------------------ Top bar ------------------------------ */}
       <header className="flex items-center justify-between border-b border-slate-200 bg-white px-8 py-4">
         <div className="flex items-center gap-3">
@@ -180,9 +181,8 @@ export default function ComplianceMonitorPage() {
         </div>
         <div className="flex items-center gap-4">
           <span
-            className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-              apiUp ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"
-            }`}
+            className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${apiUp ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"
+              }`}
           >
             <span className={`h-2 w-2 rounded-full ${apiUp ? "bg-emerald-500" : "bg-red-500"}`} />
             {apiUp ? "API Connected (Port 8081)" : "API Unreachable (Port 8081)"}
@@ -200,21 +200,21 @@ export default function ComplianceMonitorPage() {
         {/* ----------------------------- Stat cards ----------------------------- */}
         <section className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Stat title="Zonal Compliance">
-            <p className="text-2xl font-bold text-emerald-600">{summary.cleanRatio}% Clean Ratio</p>
+            <p className="text-2xl font-bold text-emerald-600">{safeSummary.cleanRatio}% Clean Ratio</p>
             <p className="text-sm text-slate-600">Across North Zone</p>
           </Stat>
           <Stat title="On-Time Submissions">
             <p className="text-2xl font-bold">
-              {summary.onTime} / {summary.totalColleges} Colleges
+              {safeSummary.onTime} / {safeSummary.totalColleges} Colleges
             </p>
             <p className="text-sm text-slate-600">({onTimePct}% On-Time Rate)</p>
           </Stat>
           <Stat title="Intake Breaches">
-            <p className="text-2xl font-bold text-red-600">{summary.intakeBreaches} Institutions</p>
+            <p className="text-2xl font-bold text-red-600">{safeSummary.intakeBreaches} Institutions</p>
             <p className="text-sm text-slate-600">(Exceeding Sanctioned)</p>
           </Stat>
           <Stat title="Show-Cause Notices">
-            <p className="text-2xl font-bold">{summary.activeNotices} Active Notices</p>
+            <p className="text-2xl font-bold">{safeSummary.activeNotices} Active Notices</p>
             <p className="text-sm text-slate-600">(Awaiting Response)</p>
           </Stat>
         </section>

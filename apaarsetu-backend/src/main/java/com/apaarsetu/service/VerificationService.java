@@ -108,53 +108,87 @@ public class VerificationService {
         Student student = studentRepository.findByApaarId(apaarId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student record not found for APAAR ID: " + apaarId));
 
-        // 3-point demographic verification
-        boolean nameMatch = true;
-        boolean dobMatch = true;
-        boolean genderMatch = true;
+        // 3-point demographic verification (Fail-Closed: missing or non-matching inputs score 0)
+        boolean nameMatch = false;
+        boolean dobMatch = false;
+        boolean genderMatch = false;
         int matchPoints = 0;
 
         if (student.getPersonalInfo() != null) {
             if (request.getCandidateName() != null && !request.getCandidateName().isBlank()) {
                 String candidateName = student.getPersonalInfo().getFullName();
                 if (candidateName != null && candidateName.toLowerCase().contains(request.getCandidateName().trim().toLowerCase())) {
+                    nameMatch = true;
                     matchPoints++;
-                } else {
-                    nameMatch = false;
                 }
-            } else {
-                matchPoints++;
             }
 
             if (request.getDateOfBirth() != null && !request.getDateOfBirth().isBlank()) {
                 String studentDob = student.getPersonalInfo().getDateOfBirth();
                 if (studentDob != null && studentDob.equals(request.getDateOfBirth().trim())) {
+                    dobMatch = true;
                     matchPoints++;
-                } else {
-                    dobMatch = false;
                 }
-            } else {
-                matchPoints++;
             }
 
             if (request.getGender() != null && !request.getGender().isBlank()) {
                 String studentGender = student.getPersonalInfo().getGender() != null ? student.getPersonalInfo().getGender().name() : "";
                 if (studentGender.equalsIgnoreCase(request.getGender().trim())) {
+                    genderMatch = true;
                     matchPoints++;
-                } else {
-                    genderMatch = false;
                 }
-            } else {
-                matchPoints++;
             }
         }
 
-        String matchStatus = (nameMatch && dobMatch && genderMatch) ? "MATCH_CONFIRMED" : "PARTIAL_MATCH";
-        String confidence = (matchPoints == 3) ? "HIGH (100%)" : "MEDIUM (66%)";
+        String matchStatus;
+        String confidence;
+        boolean verified;
+
+        if (nameMatch && dobMatch && genderMatch) {
+            matchStatus = "MATCH_CONFIRMED";
+            confidence = "HIGH (100%)";
+            verified = true;
+        } else if (nameMatch && (dobMatch || genderMatch)) {
+            matchStatus = "PARTIAL_MATCH";
+            confidence = "MEDIUM (66%)";
+            verified = true;
+        } else {
+            matchStatus = "UNVERIFIED_MISMATCH";
+            confidence = matchPoints == 1 ? "LOW (33%)" : "LOW (0%)";
+            verified = false;
+        }
 
         Optional<Institution> inst = institutionRepository.findByAicteId(student.getInstitutionId());
-        String instName = inst.map(Institution::getName).orElse(student.getInstitutionId());
-        String fullName = student.getPersonalInfo() != null ? student.getPersonalInfo().getFullName() : "Candidate";
+        String instName = verified ? inst.map(Institution::getName).orElse(student.getInstitutionId()) : "RESTRICTED";
+        String fullName = verified && student.getPersonalInfo() != null ? student.getPersonalInfo().getFullName() : "CANDIDATE UNVERIFIED";
+
+        String degreeName = null;
+        String completionYear = null;
+        String branch = null;
+        String enrollmentStatus = "UNVERIFIED";
+        String sealStatus = verified ? "AUTHENTIC_VALIDATED" : "VERIFICATION_FAILED";
+
+        if (verified) {
+            degreeName = "Bachelor of Technology";
+            int programDurationYears = 4;
+            if (inst.isPresent() && inst.get().getApprovedPrograms() != null) {
+                Optional<Institution.ApprovedProgram> matchedProg = inst.get().getApprovedPrograms().stream()
+                        .filter(p -> p.getProgramCode() != null && p.getProgramCode().equalsIgnoreCase(student.getProgramCode()))
+                        .findFirst();
+                if (matchedProg.isPresent()) {
+                    Institution.ApprovedProgram prog = matchedProg.get();
+                    if (prog.getProgramName() != null && !prog.getProgramName().isBlank()) {
+                        degreeName = prog.getProgramName();
+                    }
+                    if (prog.getDuration() > 0) {
+                        programDurationYears = prog.getDuration();
+                    }
+                }
+            }
+            completionYear = calculateCompletionYear(student.getAcademicYear(), programDurationYears);
+            branch = student.getProgramCode();
+            enrollmentStatus = student.getAdmissionStatus() != null ? student.getAdmissionStatus().name() : "ADMITTED_ACTIVE";
+        }
 
         String certificateId = "CERT-MANUAL-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         String tokenHash = hashString(apaarId + request.getConsentRef() + System.currentTimeMillis());
@@ -169,17 +203,17 @@ public class VerificationService {
                 .studentName(fullName)
                 .institutionName(instName)
                 .aicteCode(student.getInstitutionId())
-                .degree("Bachelor of Technology")
-                .branch(student.getProgramCode())
-                .enrollmentStatus(student.getAdmissionStatus().name())
+                .degree(degreeName)
+                .branch(branch)
+                .enrollmentStatus(enrollmentStatus)
                 .admissionYear(student.getAcademicYear())
-                .completionYear("2030")
-                .sealStatus("AUTHENTIC_VALIDATED")
+                .completionYear(completionYear)
+                .sealStatus(sealStatus)
                 .demographicMatchStatus(matchStatus)
                 .demographicConfidence(confidence)
                 .requestedBy(verifierId)
                 .verifierOrg(verifierOrg)
-                .purpose(request.getPurpose().name())
+                .purpose(request.getPurpose() != null ? request.getPurpose().name() : "EMPLOYMENT")
                 .consentRef(request.getConsentRef())
                 .verificationMethod("MANUAL")
                 .verifiedAt(Instant.now())
@@ -187,9 +221,22 @@ public class VerificationService {
                 .build();
 
         verificationTokenRepository.save(vt);
-        log.info("Manual verification recorded for APAAR '{}' by verifier '{}'", maskApaar(apaarId), verifierId);
+        log.info("Manual verification recorded for APAAR '{}' by verifier '{}' with status '{}'", maskApaar(apaarId), verifierId, matchStatus);
 
         return toCredentialDTO(vt, maskApaar(student.getApaarId()));
+    }
+
+    private String calculateCompletionYear(String academicYear, int durationYears) {
+        if (academicYear == null || academicYear.isBlank()) {
+            return String.valueOf(java.time.Year.now().getValue() + durationYears);
+        }
+        try {
+            String startYearStr = academicYear.contains("-") ? academicYear.split("-")[0].trim() : academicYear.trim();
+            int startYear = Integer.parseInt(startYearStr);
+            return String.valueOf(startYear + durationYears);
+        } catch (Exception e) {
+            return String.valueOf(java.time.Year.now().getValue() + durationYears);
+        }
     }
 
     public List<VerificationTokenDTO> getHistory(UserPrincipal verifier) {

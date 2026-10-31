@@ -84,7 +84,7 @@ export default function InstitutionAdminSidebar() {
     try {
       await logout();
     } finally {
-      router.push("/officials-login");
+      router.push("/login");
     }
   };
 

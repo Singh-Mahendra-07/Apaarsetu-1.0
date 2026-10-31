@@ -50,7 +50,7 @@ public class StudentController {
     private final StudentService studentService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN')")
+    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'ERP_CLIENT')")
     public ResponseEntity<ApiResponse<StudentResponseDTO>> createStudent(
             @Valid @RequestBody CreateStudentDTO dto,
             @AuthenticationPrincipal UserPrincipal principal,
@@ -65,7 +65,7 @@ public class StudentController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'AICTE_OFFICER')")
+    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'AICTE_ADMIN', 'AICTE_OFFICER', 'ERP_CLIENT')")
     public ResponseEntity<ApiResponse<PagedResponse<StudentListDTO>>> getStudents(
             @RequestParam(value = "institutionId", required = false) String institutionId,
             @RequestParam(value = "programCode", required = false) String programCode,
@@ -84,7 +84,7 @@ public class StudentController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'AICTE_ADMIN', 'AICTE_OFFICER')")
+    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'AICTE_ADMIN', 'AICTE_OFFICER', 'ERP_CLIENT')")
     public ResponseEntity<ApiResponse<StudentDetailDTO>> getStudentById(
             @PathVariable String id,
             @AuthenticationPrincipal UserPrincipal principal) {
@@ -94,7 +94,7 @@ public class StudentController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'AICTE_ADMIN')")
+    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'AICTE_ADMIN', 'ERP_CLIENT')")
     public ResponseEntity<ApiResponse<StudentResponseDTO>> updateStudent(
             @PathVariable String id,
             @Valid @RequestBody UpdateStudentDTO dto,
@@ -109,7 +109,7 @@ public class StudentController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'AICTE_ADMIN', 'AICTE_OFFICER')")
+    @PreAuthorize("hasAnyRole('INSTITUTION_ADMIN', 'AICTE_ADMIN', 'AICTE_OFFICER', 'ERP_CLIENT')")
     public ResponseEntity<ApiResponse<StudentResponseDTO>> searchByApaarId(
             @RequestParam("apaarId") String apaarId,
             @AuthenticationPrincipal UserPrincipal principal) {

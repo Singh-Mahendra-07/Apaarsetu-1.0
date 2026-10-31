@@ -412,15 +412,46 @@ public class BatchUploadService {
 
         enforceTenant(batch.getInstitutionId(), principal);
 
-        // Promote all PROVISIONAL students in this batch to ADMITTED_ACTIVE
+        if (batch.getStatus() == BatchStatus.APPROVED) {
+            throw new BadRequestException("Batch is already approved.");
+        }
+        if (batch.getStatus() == BatchStatus.FLAGGED) {
+            throw new BadRequestException("Cannot approve batch with FLAGGED status. All regulatory and dispute flags must be resolved first.");
+        }
+        if (batch.getStatus() == BatchStatus.FAILED || batch.getStatus() == BatchStatus.REJECTED) {
+            throw new BadRequestException("Cannot approve batch with status: " + batch.getStatus());
+        }
+
+        // Pre-validation: Verify intake capacity before promoting
         List<Student> students = studentRepository.findByBatchId(batchId);
-        int promoted = 0;
-        for (Student s : students) {
-            if (s.getAdmissionStatus() == AdmissionStatus.PROVISIONAL && s.getValidationStatus() == ValidationStatus.VALIDATED) {
-                s.setAdmissionStatus(AdmissionStatus.ADMITTED_ACTIVE);
-                studentRepository.save(s);
-                promoted++;
+        List<Student> eligibleToPromote = students.stream()
+                .filter(s -> s.getAdmissionStatus() == AdmissionStatus.PROVISIONAL && s.getValidationStatus() == ValidationStatus.VALIDATED)
+                .toList();
+
+        Institution institution = institutionRepository.findByAicteId(batch.getInstitutionId()).orElse(null);
+        if (institution != null && institution.getApprovedPrograms() != null) {
+            Optional<Institution.ApprovedProgram> progOpt = institution.getApprovedPrograms().stream()
+                    .filter(p -> p.getProgramCode() != null && p.getProgramCode().equalsIgnoreCase(batch.getProgramCode()))
+                    .findFirst();
+            if (progOpt.isPresent()) {
+                Institution.ApprovedProgram prog = progOpt.get();
+                long currentAdmitted = studentRepository.countByInstitutionIdAndProgramCodeAndAcademicYearAndAdmissionStatus(
+                        batch.getInstitutionId(), batch.getProgramCode(), batch.getAcademicYear(), AdmissionStatus.ADMITTED_ACTIVE);
+                long regularPromoteCount = eligibleToPromote.stream()
+                        .filter(s -> s.getSeatCategory() == SeatCategory.REGULAR_GENERAL || s.getSeatCategory() == SeatCategory.REGULAR_RESERVED)
+                        .count();
+                if (prog.getApprovedIntake() > 0 && (currentAdmitted + regularPromoteCount) > prog.getApprovedIntake()) {
+                    throw new BadRequestException("Batch approval rejected: Promoting " + regularPromoteCount +
+                            " regular students would exceed approved program intake (" + (currentAdmitted + regularPromoteCount) + " > " + prog.getApprovedIntake() + ")");
+                }
             }
+        }
+
+        int promoted = 0;
+        for (Student s : eligibleToPromote) {
+            s.setAdmissionStatus(AdmissionStatus.ADMITTED_ACTIVE);
+            studentRepository.save(s);
+            promoted++;
         }
 
         batch.setStatus(BatchStatus.APPROVED);

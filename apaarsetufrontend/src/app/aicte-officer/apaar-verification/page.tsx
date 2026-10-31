@@ -1,11 +1,18 @@
-import React from 'react'
+"use client";
 
-function page() {
+import { ShieldCheck } from "lucide-react";
+import SubsystemPlaceholder from "@/components/layout/SubsystemPlaceholder";
+
+export default function ApaarVerificationPage() {
   return (
-    <div>
-      appar
-    </div>
-  )
+    <SubsystemPlaceholder
+      portalTitle="AICTE Officer"
+      portalDashboardHref="/aicte-officer"
+      subsystemTitle="Regional APAAR Record Adjudication & Verification"
+      description="Direct query console for validating student APAAR numbers, reviewing DPDP-compliant verification logs, and adjudicating identity discrepancies reported by institutions."
+      icon={ShieldCheck}
+      backendEndpoint="GET /api/v1/students/search?apaarId={id}"
+      plannedRelease="Officer Investigation Console"
+    />
+  );
 }
-
-export default page

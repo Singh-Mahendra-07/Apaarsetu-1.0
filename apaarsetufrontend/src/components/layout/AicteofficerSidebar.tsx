@@ -79,7 +79,7 @@ export default function OfficerSidebar() {
     try {
       await logout();
     } finally {
-      router.push("/officials-login");
+      router.push("/login");
     }
   };
 
